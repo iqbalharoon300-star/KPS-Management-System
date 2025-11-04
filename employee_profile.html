@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Profile | KPS Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    main.content {
+      background: #f9fafb;
+      padding: 25px;
+      border-radius: 12px;
+    }
+
+    .profile-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 700px;
+      margin: auto;
+      text-align: center;
+    }
+
+    .profile-photo {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #009e60;
+    }
+
+    .profile-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: #009e60;
+      margin-top: 10px;
+    }
+
+    .profile-role {
+      font-size: 15px;
+      color: #555;
+    }
+
+    .profile-section {
+      font-size: 14px;
+      color: #777;
+    }
+
+    form.profile-form {
+      text-align: left;
+      margin-top: 25px;
+    }
+
+    form.profile-form label {
+      font-weight: 600;
+      color: #333;
+      display: block;
+      margin-top: 10px;
+    }
+
+    form.profile-form input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+      font-size: 14px;
+    }
+
+    .btn {
+      background: #009e60;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-top: 20px;
+      font-weight: 600;
+    }
+
+    .btn:hover { background: #00b874; }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #009e60;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.5s, transform 0.5s;
+      transform: translateY(20px);
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div id="header-placeholder"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="assets/logo.png" class="logo" alt="Kcal Logo" />
+      <h2>KPS System</h2>
+      <p class="slogan">Healthy Eat, Healthy Life</p>
+    </div>
+    <h3 class="sidebar-title">Navigation</h3>
+    <ul>
+      <li><a href="dashboard.html">🏠 Dashboard</a></li>
+      <li><a href="attendance.html">🕒 Attendance</a></li>
+      <li><a href="overtime.html">⏱ Overtime</a></li>
+      <li><a href="requests.html">📨 Requests</a></li>
+      <li><a href="notifications.html">🔔 Notifications</a></li>
+      <li class="active"><a href="employee_profile.html">👤 My Profile</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+    <div class="profile-card">
+      <img id="profilePhoto" src="assets/default-user.png" class="profile-photo" alt="Profile Photo" />
+      <div class="profile-name" id="profileName">Loading...</div>
+      <div class="profile-role" id="profileRole"></div>
+      <div class="profile-section" id="profileSection"></div>
+
+      <form class="profile-form" id="profileForm">
+        <label>Email</label>
+        <input type="email" id="email" />
+
+        <label>Phone</label>
+        <input type="text" id="phone" />
+
+        <label>Profile Picture (optional)</label>
+        <input type="file" id="photo" accept="image/*" />
+
+        <button type="submit" class="btn">💾 Update Profile</button>
+      </form>
+    </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+    import { firebaseConfig } from "./scripts/firebase-config.js";
+    import { protectPage, attachLogout } from "./app.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const auth = getAuth(app);
+
+    fetch("header.html")
+      .then(r => r.text())
+      .then(d => {
+        document.getElementById("header-placeholder").innerHTML = d;
+        document.getElementById("goToDashboard")?.addEventListener("click", () => window.location.href = "dashboard.html");
+        attachLogout();
+      });
+
+    protectPage();
+
+    const toast = document.getElementById("toast");
+    const profilePhoto = document.getElementById("profilePhoto");
+    const profileName = document.getElementById("profileName");
+    const profileRole = document.getElementById("profileRole");
+    const profileSection = document.getElementById("profileSection");
+    const form = document.getElementById("profileForm");
+
+    function showToast(msg, success = true) {
+      toast.textContent = msg;
+      toast.style.background = success ? "#009e60" : "#e53935";
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+      const ref = doc(db, "employees", user.uid);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const data = snap.data();
+        profileName.textContent = data.fullName || `${data.firstName || ""} ${data.lastName || ""}`;
+        profileRole.textContent = data.role;
+        profileSection.textContent = `${data.section} – ${data.shift}`;
+        document.getElementById("email").value = data.email || "";
+        document.getElementById("phone").value = data.phone || "";
+        if (data.photoURL) profilePhoto.src = data.photoURL;
+      } else {
+        showToast("Profile not found", false);
+      }
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const ref = doc(db, "employees", user.uid);
+      const updateData = {
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+      };
+
+      const file = document.getElementById("photo").files[0];
+      if (file) {
+        const sref = ref(storage, "employee_photos/" + Date.now() + "_" + file.name);
+        await uploadBytes(sref, file);
+        const photoURL = await getDownloadURL(sref);
+        updateData.photoURL = photoURL;
+      }
+
+      await updateDoc(ref, updateData);
+      showToast("✅ Profile updated successfully");
+    });
+  </script>
+</body>
+</html>

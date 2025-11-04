@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Settings | KPS Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .settings-card {
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      max-width: 800px;
+      margin: 0 auto 30px;
+    }
+
+    .settings-card h3 {
+      color: #006b3c;
+      margin-bottom: 15px;
+    }
+
+    .settings-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .settings-form label {
+      font-weight: 600;
+      color: #006b3c;
+    }
+
+    .settings-form input,
+    .settings-form select {
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 0.9rem;
+    }
+
+    .settings-form button {
+      background: #006b3c;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+      align-self: flex-start;
+    }
+
+    .settings-form button:hover {
+      background: #009e58;
+    }
+
+    .settings-note {
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 10px;
+    }
+
+    .settings-divider {
+      height: 1px;
+      background: #e0e0e0;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div id="header-container"></div>
+
+  <!-- PAGE WRAPPER -->
+  <div class="app-shell">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="nav-title">Main Menu</div>
+      <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+      <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
+      <a href="employee_list.html" class="nav-link">📋 Employee List</a>
+      <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+      <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+      <a href="requests.html" class="nav-link">📩 Requests</a>
+      <a href="reports.html" class="nav-link">📊 Reports</a>
+      <a href="meetings.html" class="nav-link">📅 Meetings</a>
+      <a href="notifications.html" class="nav-link">🔔 Notifications</a>
+      <a href="settings.html" class="nav-link active">⚙ Settings</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <h2>System Settings</h2>
+      <p class="section-title">Manage KPS configurations and department preferences</p>
+
+      <div class="settings-card">
+        <h3>Attendance & Overtime Setup</h3>
+        <form id="settingsForm" class="settings-form">
+          <label for="attendanceCutoff">Daily Working Hours (before Overtime)</label>
+          <input type="number" id="attendanceCutoff" min="1" max="24" placeholder="10" />
+
+          <label for="attendanceCycle">Attendance Cycle (Start → End)</label>
+          <input type="text" id="attendanceCycle" placeholder="21st → 20th" />
+
+          <label for="overtimeCycle">Overtime Cycle (Start → End)</label>
+          <input type="text" id="overtimeCycle" placeholder="16th → 15th" />
+
+          <label for="publicHoliday">Public Holiday Policy</label>
+          <select id="publicHoliday">
+            <option value="paid">Paid</option>
+            <option value="unpaid">Unpaid</option>
+          </select>
+
+          <div class="settings-divider"></div>
+
+          <label for="defaultShift">Default Shift</label>
+          <select id="defaultShift">
+            <option value="Day">Day</option>
+            <option value="Night">Night</option>
+            <option value="Both">Both</option>
+          </select>
+
+          <label for="departmentName">Department Name</label>
+          <input type="text" id="departmentName" placeholder="Kcal Packaging Department" />
+
+          <button type="submit">💾 Save Settings</button>
+          <p id="settingsMsg" style="margin-top:10px; font-weight:600;"></p>
+        </form>
+
+        <p class="settings-note">
+          ⚙ These settings affect attendance and overtime calculations globally across the KPS Management System.
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <!-- SCRIPT -->
+  <script type="module">
+    import { protectPage, attachLogout, loadUserData} from "./app.js";
+    import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+    // Load Header
+    fetch("header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("header-container").innerHTML = html;
+        const sidebar = document.querySelector(".sidebar");
+        const toggle = document.getElementById("menuToggle");
+        if (toggle && sidebar) toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
+        attachLogout();
+        loadUserData();
+      });
+
+    // Restrict access only to Admin, Manager, Supervisor
+    protectPage({ roles: ["Admin", "Manager", "Supervisor"] });
+
+    const form = document.getElementById("settingsForm");
+    const msg = document.getElementById("settingsMsg");
+    const settingsRef = doc(db, "system", "settings");
+
+    // Load existing settings
+    async function loadSettings() {
+      const snap = await getDoc(settingsRef);
+      if (snap.exists()) {
+        const s = snap.data();
+        document.getElementById("attendanceCutoff").value = s.attendanceCutoff || 10;
+        document.getElementById("attendanceCycle").value = s.attendanceCycle || "21st → 20th";
+        document.getElementById("overtimeCycle").value = s.overtimeCycle || "16th → 15th";
+        document.getElementById("publicHoliday").value = s.publicHoliday || "paid";
+        document.getElementById("defaultShift").value = s.defaultShift || "Day";
+        document.getElementById("departmentName").value = s.departmentName || "Kcal Packaging Department";
+      }
+    }
+
+    // Save settings
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      msg.textContent = "Saving...";
+      msg.style.color = "#555";
+
+      const data = {
+        attendanceCutoff: parseInt(document.getElementById("attendanceCutoff").value) || 10,
+        attendanceCycle: document.getElementById("attendanceCycle").value,
+        overtimeCycle: document.getElementById("overtimeCycle").value,
+        publicHoliday: document.getElementById("publicHoliday").value,
+        defaultShift: document.getElementById("defaultShift").value,
+        departmentName: document.getElementById("departmentName").value,
+        updatedAt: new Date().toISOString(),
+      };
+
+      try {
+        await setDoc(settingsRef, data);
+        msg.textContent = "✅ Settings saved successfully!";
+        msg.style.color = "green";
+      } catch (err) {
+        console.error(err);
+        msg.textContent = "❌ " + err.message;
+        msg.style.color = "red";
+      }
+    });
+
+    loadSettings();
+  </script>
+</body>
+</html>

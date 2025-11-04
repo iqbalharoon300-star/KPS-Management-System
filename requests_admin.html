@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Request Admin | KPS Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    main.content {
+      background: #f9fafb;
+      padding: 25px;
+      border-radius: 12px;
+    }
+    h2 {
+      color: #009e60;
+      margin-bottom: 15px;
+    }
+    .card {
+      background: #fff;
+      padding: 25px;
+      border-radius: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #eee;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #009e60;
+      color: #fff;
+    }
+    .btn {
+      background: #009e60;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 15px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .btn:hover { background: #00b874; }
+    .reject {
+      background: #e53935;
+    }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #009e60;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.5s, transform 0.5s;
+      transform: translateY(20px);
+      z-index: 999;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="app-body">
+  <div id="header-container"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="assets/logo.png" class="logo" alt="Kcal Logo" />
+      <h2>KPS System</h2>
+      <p class="slogan">Healthy Eat, Healthy Life</p>
+    </div>
+    <ul>
+      <li><a href="dashboard.html">🏠 Dashboard</a></li>
+      <li class="active"><a href="request_admin.html">📋 Manage Requests</a></li>
+      <li><a href="reports.html">📊 Reports</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+    <h2>Manage Employee Requests</h2>
+    <div class="card">
+      <table id="requestsTable">
+        <thead>
+          <tr>
+            <th>UID</th>
+            <th>Name</th>
+            <th>Section</th>
+            <th>Request Type</th>
+            <th>Details</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody><tr><td colspan="7">Loading requests...</td></tr></tbody>
+      </table>
+    </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+    import { firebaseConfig } from "./scripts/firebase-config.js";
+    import { protectPage, attachLogout } from "./app.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    fetch("header.html")
+      .then(r => r.text())
+      .then(d => {
+        document.getElementById("header-placeholder").innerHTML = d;
+        document.getElementById("goToDashboard")?.addEventListener("click", () => window.location.href = "dashboard.html");
+        attachLogout();
+      });
+
+    protectPage();
+
+    const toast = document.getElementById("toast");
+    const tableBody = document.querySelector("#requestsTable tbody");
+
+    function showToast(msg, success = true) {
+      toast.textContent = msg;
+      toast.style.background = success ? "#009e60" : "#e53935";
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+
+    async function loadRequests() {
+      tableBody.innerHTML = "<tr><td colspan='7'>Loading...</td></tr>";
+      const q = query(collection(db, "requests"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+
+      if (snap.empty) {
+        tableBody.innerHTML = "<tr><td colspan='7'>No requests found</td></tr>";
+        return;
+      }
+
+      tableBody.innerHTML = "";
+      snap.forEach(d => {
+        const r = d.data();
+        const row = `
+          <tr data-id="${d.id}">
+            <td>${r.uid || "-"}</td>
+            <td>${r.fullName || "-"}</td>
+            <td>${r.section || "-"}</td>
+            <td>${r.type}</td>
+            <td>${r.details}</td>
+            <td><b>${r.status}</b></td>
+            <td>
+              ${r.status === "Pending"
+                ? `<button class="btn approve">✅ Approve</button>
+                   <button class="btn reject">❌ Reject</button>`
+                : `<i>${r.status}</i>`}
+            </td>
+          </tr>`;
+        tableBody.insertAdjacentHTML("beforeend", row);
+      });
+    }
+
+    tableBody.addEventListener("click", async (e) => {
+      const row = e.target.closest("tr");
+      if (!row) return;
+      const id = row.dataset.id;
+      if (e.target.classList.contains("approve")) {
+        await updateDoc(doc(db, "requests", id), { status: "Approved" });
+        showToast("✅ Request Approved!");
+        loadRequests();
+      } else if (e.target.classList.contains("reject")) {
+        await updateDoc(doc(db, "requests", id), { status: "Rejected" });
+        showToast("❌ Request Rejected!", false);
+        loadRequests();
+      }
+    });
+
+    loadRequests();
+<script>
+  // Load header
+  fetch("header.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("header-container").innerHTML = data;
+
+      // Activate menu toggle once header loads
+      const toggle = document.getElementById("menuToggle");
+      const sidebar = document.querySelector(".sidebar");
+      if (toggle && sidebar) {
+        toggle.addEventListener("click", () => {
+          sidebar.classList.toggle("active");
+        });
+      }
+
+      // Attach logout function
+      import("./app.js").then(module => module.attachLogout());
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Employee List | KPS Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* === Employee Card Grid === */
+    .employee-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .employee-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      padding: 20px 15px;
+      text-align: center;
+      transition: transform 0.2s ease;
+      position: relative;
+    }
+
+    .employee-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .employee-card img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #006b3c;
+      margin-bottom: 10px;
+    }
+
+    .employee-name {
+      font-weight: 700;
+      color: #222;
+      font-size: 1rem;
+    }
+
+    .employee-role {
+      font-size: 0.85rem;
+      color: #006b3c;
+      margin: 4px 0;
+    }
+
+    .employee-section {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .employee-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-small {
+      font-size: 0.8rem;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn-edit {
+      background: #009e58;
+      color: #fff;
+    }
+
+    .btn-delete {
+      background: #d32f2f;
+      color: #fff;
+    }
+
+    .btn-edit:hover { background: #00b96b; }
+    .btn-delete:hover { background: #ff4a4a; }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .filter-bar select {
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+ <!-- HEADER -->
+<body>
+ <div id="header-container"></div>
+
+  <!-- PAGE WRAPPER -->
+  <div class="app-shell">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="nav-title">Main Menu</div>
+      <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+      <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
+      <a href="employee_list.html" class="nav-link active">📋 Employee List</a>
+      <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+      <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+      <a href="requests.html" class="nav-link">📩 Requests</a>
+      <a href="reports.html" class="nav-link">📊 Reports</a>
+      <a href="meetings.html" class="nav-link">📅 Meetings</a>
+      <a href="notifications.html" class="nav-link">🔔 Notifications</a>
+      <a href="settings.html" class="nav-link">⚙ Settings</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <h2>Employee List</h2>
+      <p class="section-title">View, Edit, or Delete Employees</p>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <select id="filterSection">
+          <option value="">All Sections</option>
+          <option>Kcal Life</option>
+          <option>Kcal Lunch</option>
+          <option>Spring</option>
+          <option>Kcal Meal Plan</option>
+          <option>FuelUP</option>
+        </select>
+
+        <select id="filterRole">
+          <option value="">All Roles</option>
+          <option>Manager</option>
+          <option>Supervisor</option>
+          <option>Assistant Supervisor</option>
+          <option>Senior Packer</option>
+          <option>Junior Packer</option>
+          <option>Packer</option>
+        </select>
+      </div>
+
+      <!-- Employee Cards -->
+      <div id="employeeGrid" class="employee-grid">
+        <p>Loading employees...</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- LOAD HEADER, LOGOUT, AND DATA -->
+  <script type="module">
+    import { protectPage, attachLogout, loadUserData } from "./app.js";
+    import {
+      collection,
+      getDocs,
+      query,
+      where
+    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+    // Load Header
+    fetch("header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("header-container").innerHTML = html;
+
+        const sidebar = document.querySelector(".sidebar");
+        const toggle = document.getElementById("menuToggle");
+        if (toggle && sidebar) {
+          toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
+        }
+
+        attachLogout();
+        loadUserData();
+      });
+
+    // Protect for Manager/Supervisor/Admin only
+    protectPage({ roles: ["Admin", "Manager", "Supervisor"] });
+
+    // Load Employees
+    async function loadEmployees() {
+      const grid = document.getElementById("employeeGrid");
+      grid.innerHTML = "<p>Loading employees...</p>";
+
+      const qSnap = await getDocs(collection(db, "employees"));
+      grid.innerHTML = "";
+
+      qSnap.forEach(docSnap => {
+        const emp = docSnap.data();
+
+        const card = document.createElement("div");
+        card.className = "employee-card";
+        card.innerHTML = `
+          <img src="${emp.photoURL || 'assets/user.png'}" alt="${emp.fullName}">
+          <div class="employee-name">${emp.fullName || "Unnamed"}</div>
+          <div class="employee-role">${emp.role || ""}</div>
+          <div class="employee-section">${emp.section || ""} | ${emp.shift || ""}</div>
+          <div class="employee-actions">
+            <button class="btn-small btn-edit" data-id="${docSnap.id}">Edit</button>
+            <button class="btn-small btn-delete" data-id="${docSnap.id}">Delete</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      // Edit/Delete actions
+      document.querySelectorAll(".btn-edit").forEach(btn => {
+        btn.addEventListener("click", e => {
+          const id = e.target.getAttribute("data-id");
+          window.location.href = `edit_employee.html?id=${id}`;
+        });
+      });
+
+      document.querySelectorAll(".btn-delete").forEach(btn => {
+        btn.addEventListener("click", async e => {
+          const id = e.target.getAttribute("data-id");
+          if (confirm("Are you sure you want to delete this employee?")) {
+            const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js");
+            await deleteDoc(doc(db, "employees", id));
+            alert("Employee deleted successfully.");
+            loadEmployees();
+          }
+        });
+      });
+    }
+
+    loadEmployees();
+
+    // Optional filter logic (future expansion)
+    document.getElementById("filterSection").addEventListener("change", loadEmployees);
+    document.getElementById("filterRole").addEventListener("change", loadEmployees);
+  </script>
+
+</body>
+</html>

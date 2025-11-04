@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Profile | KPS Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .profile-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .profile-photo {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #006b3c;
+      margin-bottom: 15px;
+    }
+
+    .profile-info {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .profile-info label {
+      font-weight: 600;
+      color: #006b3c;
+    }
+
+    .profile-info input,
+    .profile-info select {
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      width: 100%;
+    }
+
+    .profile-actions {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .profile-actions button {
+      background: #006b3c;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .profile-actions button:hover {
+      background: #009e58;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div id="header-container"></div>
+
+  <!-- PAGE WRAPPER -->
+  <div class="app-shell">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="nav-title">Main Menu</div>
+      <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+      <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
+      <a href="employee_list.html" class="nav-link">📋 Employee List</a>
+      <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+      <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+      <a href="requests.html" class="nav-link">📩 Requests</a>
+      <a href="reports.html" class="nav-link">📊 Reports</a>
+      <a href="meetings.html" class="nav-link">📅 Meetings</a>
+      <a href="notifications.html" class="nav-link">🔔 Notifications</a>
+      <a href="profile.html" class="nav-link active">👤 Profile</a>
+      <a href="settings.html" class="nav-link">⚙ Settings</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <h2>Employee Profile</h2>
+      <p class="section-title">View and update your personal details</p>
+
+      <div class="profile-container">
+        <img id="profilePhoto" src="assets/default-user.png" alt="Profile" class="profile-photo" />
+
+        <form id="profileForm" class="profile-info">
+          <label for="uid">Employee UID</label>
+          <input id="uid" type="text" disabled />
+
+          <label for="fullName">Full Name</label>
+          <input id="fullName" type="text" disabled />
+
+          <label for="role">Role</label>
+          <input id="role" type="text" disabled />
+
+          <label for="section">Section</label>
+          <input id="section" type="text" disabled />
+
+          <label for="shift">Shift</label>
+          <input id="shift" type="text" disabled />
+
+          <label for="email">Email</label>
+          <input id="email" type="email" />
+
+          <label for="phone">Phone</label>
+          <input id="phone" type="text" />
+
+          <label for="photo">Change Profile Picture (Optional)</label>
+          <input id="photo" type="file" accept="image/*" />
+
+          <div class="profile-actions">
+            <button type="submit">💾 Save Changes</button>
+            <button type="button" id="resetBtn" style="background:#999;">🔄 Reset</button>
+          </div>
+
+          <p id="profileMsg" style="margin-top:10px; font-weight:600;"></p>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- SCRIPT -->
+  <script type="module">
+    import { protectPage, attachLogout, loadUserData, db, storage } from "./app.js";
+    import {
+      doc,
+      getDoc,
+      updateDoc
+    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+    import {
+      ref,
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
+
+    // Load Header
+    fetch("header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("header-container").innerHTML = html;
+        const sidebar = document.querySelector(".sidebar");
+        const toggle = document.getElementById("menuToggle");
+        if (toggle && sidebar) toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
+        attachLogout();
+        loadUserData();
+      });
+
+    protectPage();
+
+    const form = document.getElementById("profileForm");
+    const msg = document.getElementById("profileMsg");
+    const resetBtn = document.getElementById("resetBtn");
+    const photoInput = document.getElementById("photo");
+    const photoEl = document.getElementById("profilePhoto");
+
+    async function loadProfile() {
+      const user = window.currentUser;
+      const docRef = doc(db, "employees", user.uid);
+      const snap = await getDoc(docRef);
+
+      if (!snap.exists()) {
+        msg.textContent = "⚠ Profile not found in database.";
+        msg.style.color = "red";
+        return;
+      }
+
+      const data = snap.data();
+      document.getElementById("uid").value = data.uid || user.uid;
+      document.getElementById("fullName").value = data.fullName || "";
+      document.getElementById("role").value = data.role || "";
+      document.getElementById("section").value = data.section || "";
+      document.getElementById("shift").value = data.shift || "";
+      document.getElementById("email").value = data.email || user.email || "";
+      document.getElementById("phone").value = data.phone || "";
+      photoEl.src = data.photoURL || "assets/default-user.png";
+
+      // Disable edit for employees
+      const editable = ["Admin", "Manager", "Supervisor"].includes(user.role);
+      document.querySelectorAll("#profileForm input").forEach(inp => {
+        if (!editable && !["email", "phone", "photo"].includes(inp.id)) inp.disabled = true;
+      });
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      msg.textContent = "Updating profile...";
+      msg.style.color = "#555";
+
+      const user = window.currentUser;
+      const docRef = doc(db, "employees", user.uid);
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const photoFile = photoInput.files[0];
+
+      let photoURL = "";
+
+      try {
+        if (photoFile) {
+          const sref = ref(storage, `profiles/${user.uid}-${photoFile.name}`);
+          await uploadBytes(sref, photoFile);
+          photoURL = await getDownloadURL(sref);
+        }
+
+        const updates = { email, phone };
+        if (photoURL) updates.photoURL = photoURL;
+
+        await updateDoc(docRef, updates);
+        msg.textContent = "✅ Profile updated successfully!";
+        msg.style.color = "green";
+        loadProfile();
+      } catch (err) {
+        console.error(err);
+        msg.textContent = "❌ " + err.message;
+        msg.style.color = "red";
+      }
+    });
+
+    resetBtn.addEventListener("click", () => {
+      loadProfile();
+      msg.textContent = "";
+    });
+
+    loadProfile();
+  </script>
+</body>
+</html>

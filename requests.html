@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Requests | KPS Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .request-card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      max-width: 800px;
+      margin: 0 auto 30px;
+    }
+
+    .request-card h3 {
+      color: #006b3c;
+      margin-bottom: 10px;
+    }
+
+    .request-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .request-form select,
+    .request-form textarea {
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      width: 100%;
+    }
+
+    .request-form button {
+      background: #006b3c;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+      align-self: flex-start;
+    }
+
+    .request-form button:hover {
+      background: #009e58;
+    }
+
+    .request-log table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    .request-log th, .request-log td {
+      border: 1px solid #e0e0e0;
+      padding: 8px 10px;
+      font-size: 0.9rem;
+    }
+
+    .request-log th {
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .status-approved { color: green; font-weight: 600; }
+    .status-pending { color: #d98400; font-weight: 600; }
+    .status-rejected { color: red; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div id="header-container"></div>
+
+  <!-- PAGE WRAPPER -->
+  <div class="app-shell">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="nav-title">Main Menu</div>
+      <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+      <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
+      <a href="employee_list.html" class="nav-link">📋 Employee List</a>
+      <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+      <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+      <a href="requests.html" class="nav-link active">📩 Requests</a>
+      <a href="reports.html" class="nav-link">📊 Reports</a>
+      <a href="meetings.html" class="nav-link">📅 Meetings</a>
+      <a href="notifications.html" class="nav-link">🔔 Notifications</a>
+      <a href="settings.html" class="nav-link">⚙ Settings</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <h2>Employee Requests</h2>
+      <p class="section-title">Submit or manage HR-related requests</p>
+
+      <!-- Request Form -->
+      <div class="request-card">
+        <h3>New Request</h3>
+        <form id="requestForm" class="request-form">
+          <select id="requestType" required>
+            <option value="">Select Request Type</option>
+            <option>Salary Slip</option>
+            <option>Salary Transfer Letter</option>
+            <option>Salary Certificate</option>
+            <option>Annual Leave Form</option>
+            <option>Resumption Form</option>
+            <option>Uniform Request</option>
+            <option>Change Duty</option>
+            <option>Change Section</option>
+            <option>NOC</option>
+            <option>Others</option>
+          </select>
+
+          <textarea id="requestDetails" placeholder="Enter request details..." rows="3"></textarea>
+
+          <button type="submit">📤 Submit Request</button>
+          <p id="reqMsg" style="font-weight:600; margin-top:10px;"></p>
+        </form>
+      </div>
+
+      <!-- Request Log -->
+      <div class="request-log">
+        <h3>Request Records</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Details</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="reqTable">
+            <tr><td colspan="5">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- SCRIPT -->
+  <script type="module">
+    import { protectPage, attachLogout, loadUserData} from "./app.js";
+    import {
+      collection,
+      addDoc,
+      getDocs,
+      updateDoc,
+      doc,
+      serverTimestamp,
+      where,
+      query
+    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+    // Load Header
+    fetch("header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("header-container").innerHTML = html;
+        const sidebar = document.querySelector(".sidebar");
+        const toggle = document.getElementById("menuToggle");
+        if (toggle && sidebar) toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
+        attachLogout();
+        loadUserData();
+      });
+
+    // Protect Page
+    protectPage();
+
+    const reqForm = document.getElementById("requestForm");
+    const reqMsg = document.getElementById("reqMsg");
+    const reqTable = document.getElementById("reqTable");
+    const reqCol = collection(db, "requests");
+
+    // Submit new request
+    reqForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const type = document.getElementById("requestType").value;
+      const details = document.getElementById("requestDetails").value.trim();
+      const user = window.currentUser;
+
+      if (!type || !user) {
+        reqMsg.textContent = "Please select type and ensure you are logged in.";
+        reqMsg.style.color = "red";
+        return;
+      }
+
+      try {
+        await addDoc(reqCol, {
+          uid: user.uid,
+          userName: user.firstName + " " + user.lastName,
+          type,
+          details,
+          status: "Pending",
+          createdAt: serverTimestamp()
+        });
+
+        reqMsg.textContent = "✅ Request submitted successfully!";
+        reqMsg.style.color = "green";
+        reqForm.reset();
+        loadRequests();
+      } catch (err) {
+        console.error(err);
+        reqMsg.textContent = "❌ " + err.message;
+        reqMsg.style.color = "red";
+      }
+    });
+
+    // Load requests
+    async function loadRequests() {
+      const user = window.currentUser;
+      const q = user.role === "Employee"
+        ? query(reqCol, where("uid", "==", user.uid))
+        : reqCol; // Managers/Supervisors see all
+
+      const snap = await getDocs(q);
+      reqTable.innerHTML = "";
+
+      if (snap.empty) {
+        reqTable.innerHTML = "<tr><td colspan='5'>No requests yet.</td></tr>";
+        return;
+      }
+
+      snap.forEach(d => {
+        const r = d.data();
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${r.createdAt ? new Date(r.createdAt.seconds * 1000).toLocaleDateString() : "-"}</td>
+          <td>${r.type}</td>
+          <td>${r.details || "-"}</td>
+          <td class="status-${r.status.toLowerCase()}">${r.status}</td>
+          <td>
+            ${["Manager", "Supervisor", "Admin"].includes(user.role)
+              ? `<button class="btn-small btn-edit" data-id="${d.id}">Approve</button>
+                 <button class="btn-small btn-delete" data-id="${d.id}">Reject</button>`
+              : "-"}
+          </td>
+        `;
+        reqTable.appendChild(tr);
+      });
+
+      // Approve/Reject Logic
+      document.querySelectorAll(".btn-edit").forEach(btn => {
+        btn.addEventListener("click", async e => {
+          const id = e.target.getAttribute("data-id");
+          await updateDoc(doc(db, "requests", id), { status: "Approved" });
+          loadRequests();
+        });
+      });
+
+      document.querySelectorAll(".btn-delete").forEach(btn => {
+        btn.addEventListener("click", async e => {
+          const id = e.target.getAttribute("data-id");
+          await updateDoc(doc(db, "requests", id), { status: "Rejected" });
+          loadRequests();
+        });
+      });
+    }
+
+    loadRequests();
+  </script>
+</body>
+</html>

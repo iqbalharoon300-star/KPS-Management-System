@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reports | KPS Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .report-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    .report-filters select,
+    .report-filters input {
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 0.9rem;
+    }
+
+    .btn-export {
+      background: #006b3c;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .btn-export:hover {
+      background: #009e58;
+    }
+
+    .report-section {
+      margin-top: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #e0e0e0;
+      padding: 8px 10px;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    th {
+      background: #f5f5f5;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div id="header-container"></div>
+
+  <!-- PAGE WRAPPER -->
+  <div class="app-shell">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="nav-title">Main Menu</div>
+      <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+      <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
+      <a href="employee_list.html" class="nav-link">📋 Employee List</a>
+      <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+      <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+      <a href="requests.html" class="nav-link">📩 Requests</a>
+      <a href="reports.html" class="nav-link active">📊 Reports</a>
+      <a href="meetings.html" class="nav-link">📅 Meetings</a>
+      <a href="notifications.html" class="nav-link">🔔 Notifications</a>
+      <a href="settings.html" class="nav-link">⚙ Settings</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <h2>Reports</h2>
+      <p class="section-title">View summaries and export data</p>
+
+      <!-- FILTER BAR -->
+      <div class="report-filters">
+        <select id="reportType">
+          <option value="attendance">Attendance</option>
+          <option value="overtime">Overtime</option>
+          <option value="requests">Requests</option>
+        </select>
+
+        <input type="date" id="startDate" />
+        <input type="date" id="endDate" />
+
+        <select id="sectionFilter">
+          <option value="">All Sections</option>
+          <option>Kcal Life</option>
+          <option>Kcal Lunch</option>
+          <option>Spring</option>
+          <option>Kcal Meal Plan</option>
+          <option>FuelUP</option>
+        </select>
+
+        <button id="generateReport" class="btn-export">📄 Generate Report</button>
+        <button id="exportReport" class="btn-export">⬇ Export PDF / Excel</button>
+      </div>
+
+      <!-- REPORT TABLE -->
+      <div class="report-section">
+        <table>
+          <thead id="reportHeader">
+            <tr><th>Loading...</th></tr>
+          </thead>
+          <tbody id="reportBody">
+            <tr><td>Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- SCRIPT -->
+  <script type="module">
+    import { protectPage, attachLogout, loadUserData} from "./app.js";
+    import {
+      collection,
+      getDocs,
+      query,
+      where,
+    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+    // Load Header
+    fetch("header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("header-container").innerHTML = html;
+        const sidebar = document.querySelector(".sidebar");
+        const toggle = document.getElementById("menuToggle");
+        if (toggle && sidebar) toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
+        attachLogout();
+        loadUserData();
+      });
+
+    // Role restriction (Manager, Supervisor, Admin)
+    protectPage({ roles: ["Admin", "Manager", "Supervisor"] });
+
+    const reportType = document.getElementById("reportType");
+    const startDate = document.getElementById("startDate");
+    const endDate = document.getElementById("endDate");
+    const sectionFilter = document.getElementById("sectionFilter");
+    const reportBody = document.getElementById("reportBody");
+    const reportHeader = document.getElementById("reportHeader");
+
+    document.getElementById("generateReport").addEventListener("click", async () => {
+      const type = reportType.value;
+      reportBody.innerHTML = "<tr><td colspan='6'>Loading...</td></tr>";
+      let data = [];
+
+      if (type === "attendance") {
+        const col = collection(db, "attendance");
+        const snap = await getDocs(col);
+        data = snap.docs.map(d => d.data());
+        reportHeader.innerHTML = `
+          <tr><th>Date</th><th>Employee</th><th>Status</th><th>Check-In</th><th>Check-Out</th></tr>
+        `;
+        reportBody.innerHTML = data.map(d => `
+          <tr>
+            <td>${d.dateKey}</td>
+            <td>${d.userName}</td>
+            <td>${d.status}</td>
+            <td>${d.checkIn || "-"}</td>
+            <td>${d.checkOut || "-"}</td>
+          </tr>
+        `).join("");
+      }
+
+      if (type === "overtime") {
+        const col = collection(db, "overtime");
+        const snap = await getDocs(col);
+        data = snap.docs.map(d => d.data());
+        reportHeader.innerHTML = `
+          <tr><th>Date</th><th>Employee</th><th>Hours</th><th>Status</th></tr>
+        `;
+        reportBody.innerHTML = data.map(d => `
+          <tr>
+            <td>${d.date}</td>
+            <td>${d.empId}</td>
+            <td>${d.hours}</td>
+            <td>${d.status}</td>
+          </tr>
+        `).join("");
+      }
+
+      if (type === "requests") {
+        const col = collection(db, "requests");
+        const snap = await getDocs(col);
+        data = snap.docs.map(d => d.data());
+        reportHeader.innerHTML = `
+          <tr><th>Date</th><th>Employee</th><th>Type</th><th>Status</th></tr>
+        `;
+        reportBody.innerHTML = data.map(d => `
+          <tr>
+            <td>${d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleDateString() : "-"}</td>
+            <td>${d.userName}</td>
+            <td>${d.type}</td>
+            <td>${d.status}</td>
+          </tr>
+        `).join("");
+      }
+    });
+
+    // Placeholder for export logic
+    document.getElementById("exportReport").addEventListener("click", () => {
+      alert("📄 Export feature (PDF/Excel) will be activated soon!");
+    });
+  </script>
+</body>
+</html>

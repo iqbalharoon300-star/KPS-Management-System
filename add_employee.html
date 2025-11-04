@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Add Employee | KPS Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- HEADER -->
+  <div id="header-container"></div>
+
+  <!-- PAGE WRAPPER -->
+  <div class="app-shell">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="nav-title">Main Menu</div>
+      <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+      <a href="add_employee.html" class="nav-link active">👤 Add Employee</a>
+      <a href="employee_list.html" class="nav-link">📋 Employee List</a>
+      <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+      <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+      <a href="requests.html" class="nav-link">📩 Requests</a>
+      <a href="reports.html" class="nav-link">📊 Reports</a>
+      <a href="meetings.html" class="nav-link">📅 Meetings</a>
+      <a href="notifications.html" class="nav-link">🔔 Notifications</a>
+      <a href="settings.html" class="nav-link">⚙ Settings</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <h2>Add New Employee</h2>
+      <p class="section-title">Fill the details below to add a new team member</p>
+
+      <form id="addEmployeeForm" class="kps-form">
+        <div class="kps-form-row">
+          <div>
+            <label for="uid">Employee UID</label>
+            <input type="text" id="uid" placeholder="e.g., 10489" required />
+          </div>
+          <div>
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" placeholder="Employee full name" required />
+          </div>
+          <div>
+            <label for="role">Role</label>
+            <select id="role" required>
+              <option value="">Select Role</option>
+              <option>Supervisor</option>
+              <option>Manager</option>
+              <option>Assistant Supervisor</option>
+              <option>Senior Packer</option>
+              <option>Junior Packer</option>
+              <option>Packer</option>
+            </select>
+          </div>
+          <div>
+            <label for="section">Section</label>
+            <select id="section" required>
+              <option value="">Select Section</option>
+              <option>All</option>
+              <option>Kcal Life</option>
+              <option>Kcal Lunch</option>
+              <option>Spring</option>
+              <option>Kcal Meal Plan</option>
+              <option>FuelUP</option>
+            </select>
+          </div>
+          <div>
+            <label for="shift">Shift</label>
+            <select id="shift" required>
+              <option value="">Select Shift</option>
+              <option>Day</option>
+              <option>Night</option>
+              <option>Both</option>
+            </select>
+          </div>
+          <div>
+            <label for="joiningDate">Joining Date</label>
+            <input type="date" id="joiningDate" required />
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="Enter email" required />
+          </div>
+          <div>
+            <label for="phone">Phone Number</label>
+            <input type="text" id="phone" placeholder="Enter phone number" required />
+          </div>
+          <div>
+            <label for="photo">Profile Picture</label>
+            <input type="file" id="photo" accept="image/*" />
+          </div>
+        </div>
+
+        <button type="submit" class="btn-action">➕ Add Employee</button>
+        <p id="statusMsg" style="margin-top:10px; font-weight:600;"></p>
+      </form>
+    </main>
+  </div>
+
+  <!-- LOAD HEADER, LOGOUT, AND PROTECTION -->
+  <script type="module">
+    import { protectPage, attachLogout, loadUserData } from "./app.js";
+
+    // Load Header
+    fetch("header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("header-container").innerHTML = html;
+
+        const sidebar = document.querySelector(".sidebar");
+        const toggle = document.getElementById("menuToggle");
+        if (toggle && sidebar) {
+          toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
+        }
+
+        attachLogout();
+        loadUserData();
+      });
+
+    // Restrict Access to Supervisor/Manager/Admin
+    protectPage({ roles: ["Admin", "Manager", "Supervisor"] });
+
+    // Load Add Employee Logic
+    import("./app.js").then(m => {
+      if (m.setupAddEmployeePage) m.setupAddEmployeePage();
+    });
+  </script>
+
+</body>
+</html>
