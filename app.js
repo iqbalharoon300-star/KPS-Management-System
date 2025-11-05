@@ -1,5 +1,18 @@
 // app.js (ES Modules, v10+ SDK)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+import { auth } from "./app.js";
+import { getUserRole } from "./app.js"; 
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    // USER LOGGED IN SUCCESS ✅
+    // Optional: check user role in Firestore and route to respective dashboard later
+
+    window.location.href = "./index.html"; 
+  }
+});
+
 import { 
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut 
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
