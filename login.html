@@ -137,8 +137,13 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const email = email.value.trim();
   const password = password.value;
 
-  try { await login(email, password); }
-  catch (err) { alert(err.message); }
+  try { 
+  await login(email, password);
+  window.location.href = "dashboard.html";
+} catch (err) { 
+  alert("Login failed: " + err.message);
+}
+
 });
 </script>
 
