@@ -34,19 +34,33 @@ textarea{width:100%;height:70px;}
   border:1px solid #ddd;padding:7px;font-size:.9rem;
 }
 .deduct-table th{background:#f5f5f5;font-weight:600}
+
+.btn-small {
+  padding:5px 10px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+  font-size:.8rem;
+  margin-right:4px;
+  color:#fff;
+}
+.approve { background:#009e60; }
+.reject { background:#d9534f; }
+.delete { background:#555; }
+.btn-small:hover{opacity:.8;}
+
 .status-approved{color:#039c4b;font-weight:700}
 .status-pending{color:#d98400;font-weight:700}
+.status-rejected{color:#e53935;font-weight:700}
 </style>
 </head>
 
 <body>
 
-<!-- Header -->
 <div id="header-container"></div>
 
 <div class="app-shell">
 
-<!-- Sidebar -->
 <aside class="sidebar">
   <div class="nav-title">Main Menu</div>
   <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
@@ -60,13 +74,11 @@ textarea{width:100%;height:70px;}
   <a href="settings.html" class="nav-link">⚙ Settings</a>
 </aside>
 
-<!-- Main -->
 <main class="main-content">
 
 <h2>Deductions Management</h2>
 <p class="section-title">Late, Absence, Fine & Other Deductions</p>
 
-<!-- Add Deduction -->
 <div class="deduct-card">
 <h3>Add Deduction</h3>
 
@@ -97,13 +109,12 @@ textarea{width:100%;height:70px;}
 <p id="dedMsg" style="margin-top:10px;font-weight:600;"></p>
 </div>
 
-<!-- Deduction Records -->
 <div class="deduct-table">
 <h3>Deduction Records</h3>
 <table>
 <thead>
 <tr>
-  <th>Employee</th><th>Date</th><th>Type</th><th>Amount</th><th>Status</th><th>Action</th>
+<th>Employee</th><th>Date</th><th>Type</th><th>Amount</th><th>Status</th><th>Action</th>
 </tr>
 </thead>
 <tbody id="dedTable">
@@ -118,100 +129,101 @@ textarea{width:100%;height:70px;}
 <script type="module">
 import { protectPage, attachUserInfo, logout, db } from "./app.js";
 import { 
-  collection, addDoc, getDocs, updateDoc, deleteDoc, doc, serverTimestamp 
+ collection, addDoc, getDocs, updateDoc, deleteDoc, doc, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-// Protect only Admin / Supervisor
-protectPage(["admin","manager","supervisor"]);
+// Only Admin / Manager / Supervisor
+protectPage(["Admin","Manager","Supervisor"]);
 
 // Load header
 fetch("header.html").then(r=>r.text()).then(h=>{
-  document.getElementById("header-container").innerHTML=h;
-  attachUserInfo();
-  document.addEventListener("click",e=>{
-    if(e.target.matches("[data-logout]")) logout();
-  });
+ document.getElementById("header-container").innerHTML=h;
+ attachUserInfo();
 });
 
+// DOM elements
 const empSelect=document.getElementById("dedEmployee");
 const table=document.getElementById("dedTable");
 const form=document.getElementById("deductForm");
 const msg=document.getElementById("dedMsg");
 
-// Load Employees
+// Load employees list
 async function loadEmployees(){
-  const snap=await getDocs(collection(db,"employees"));
-  empSelect.innerHTML='<option value="">Select Employee</option>';
-  snap.forEach(d=>empSelect.innerHTML+=
-    `<option value="${d.id}">${d.data().fullName}</option>`
-  );
+ const snap=await getDocs(collection(db,"employees"));
+ empSelect.innerHTML='<option value="">Select Employee</option>';
+ snap.forEach(d=>{
+   const data=d.data();
+   empSelect.innerHTML+=`<option value="${d.id}">${data.fullName || data.name}</option>`;
+ });
 }
 
-// Add Deduction
+// Add deduction
 form.addEventListener("submit",async e=>{
-  e.preventDefault();
-  const emp=empSelect.value, date=dedDate.value, type=dedType.value,
-        amount=dedAmount.value, note=dedNote.value;
+ e.preventDefault();
+ const emp=dedEmployee.value, date=dedDate.value, type=dedType.value,
+ amount=dedAmount.value, note=dedNote.value;
 
-  if(!emp||!date||!type||!amount){
-    msg.textContent="⚠ Please fill all fields"; msg.style.color="red"; return;
-  }
+ if(!emp||!date||!type||!amount){
+   msg.textContent="⚠ Please fill all fields"; msg.style.color="red"; return;
+ }
 
-  await addDoc(collection(db,"deductions"),{
-    empId:emp,date,type,amount:Number(amount),note,status:"pending",
-    timestamp:serverTimestamp()
-  });
+ await addDoc(collection(db,"deductions"),{
+   empId:emp,date,type,amount:Number(amount),note,status:"pending",
+   timestamp:serverTimestamp()
+ });
 
-  msg.textContent="✅ Deduction added"; msg.style.color="green";
-  form.reset(); loadRecords();
+ msg.textContent="✅ Deduction added"; msg.style.color="green";
+ form.reset(); loadRecords();
 });
 
-// Load Records
+// Load deductions table
 async function loadRecords(){
-  const snap=await getDocs(collection(db,"deductions"));
-  table.innerHTML="";
+ const snap=await getDocs(collection(db,"deductions"));
+ table.innerHTML="";
 
-  if(snap.empty){
-    table.innerHTML="<tr><td colspan='6'>No records</td></tr>"; return;
-  }
+ if(snap.empty){
+   table.innerHTML="<tr><td colspan='6'>No records</td></tr>";
+   return;
+ }
 
-  const emps=await getDocs(collection(db,"employees"));
-  let empMap={}; emps.forEach(e=>empMap[e.id]=e.data().fullName);
+ const empSnap=await getDocs(collection(db,"employees"));
+ let empMap={}; empSnap.forEach(e=>empMap[e.id]=e.data().fullName || e.data().name);
 
-  snap.forEach(d=>{
-    const x=d.data();
-    table.innerHTML+=`
-      <tr>
-        <td>${empMap[x.empId]||"Unknown"}</td>
-        <td>${x.date}</td>
-        <td>${x.type}</td>
-        <td>AED ${x.amount}</td>
-        <td class="status-${x.status}">${x.status}</td>
-        <td>
-          <button class="btn-small approve" data-id="${d.id}">Approve</button>
-          <button class="btn-small reject" data-id="${d.id}">Reject</button>
-          <button class="btn-small delete" data-id="${d.id}">Delete</button>
-        </td>
-      </tr>
-    `;
-  });
+ snap.forEach(d=>{
+   const x=d.data();
+   table.innerHTML+=`
+   <tr>
+     <td>${empMap[x.empId]||"Unknown"}</td>
+     <td>${x.date}</td>
+     <td>${x.type}</td>
+     <td>AED ${x.amount}</td>
+     <td class="status-${x.status}">${x.status}</td>
+     <td>
+        <button class="btn-small approve" data-id="${d.id}">Approve</button>
+        <button class="btn-small reject" data-id="${d.id}">Reject</button>
+        <button class="btn-small delete" data-id="${d.id}">Delete</button>
+     </td>
+   </tr>
+   `;
+ });
 
-  document.querySelectorAll(".approve").forEach(btn=>btn.onclick=async()=>{ 
-    await updateDoc(doc(db,"deductions",btn.dataset.id),{status:"approved"});
-    loadRecords();
-  });
+ // Actions
+ document.querySelectorAll(".approve").forEach(btn=>btn.onclick=async()=>{
+   await updateDoc(doc(db,"deductions",btn.dataset.id),{status:"approved"});
+   loadRecords();
+ });
 
-  document.querySelectorAll(".reject").forEach(btn=>btn.onclick=async()=>{ 
-    await updateDoc(doc(db,"deductions",btn.dataset.id),{status:"rejected"});
-    loadRecords();
-  });
+ document.querySelectorAll(".reject").forEach(btn=>btn.onclick=async()=>{
+   await updateDoc(doc(db,"deductions",btn.dataset.id),{status:"rejected"});
+   loadRecords();
+ });
 
-  document.querySelectorAll(".delete").forEach(btn=>btn.onclick=async()=>{
-    if(confirm("Delete deduction?")){
-      await deleteDoc(doc(db,"deductions",btn.dataset.id));
-      loadRecords();
-    }
-  });
+ document.querySelectorAll(".delete").forEach(btn=>btn.onclick=async()=>{
+   if(confirm("Delete deduction?")){
+     await deleteDoc(doc(db,"deductions",btn.dataset.id));
+     loadRecords();
+   }
+ });
 }
 
 loadEmployees();
