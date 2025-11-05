@@ -80,11 +80,10 @@
 
     // load header
     fetch("header.html")
-      .then(r => r.text())
-      .then(h => {
-        document.getElementById("header-container").innerHTML = h;
-        loadUserData();
-      });
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById("header-container").innerHTML = html;
+  });
 
     // dashboard load after user ready
     setTimeout(loadDashboard, 800);
