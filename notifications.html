@@ -5,262 +5,171 @@
   <title>Notifications | KPS Management System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
+
   <style>
     .notify-card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      max-width: 800px;
-      margin: 0 auto 30px;
+      background:#fff;padding:20px;border-radius:10px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.08);
+      max-width:800px;margin:0 auto 30px;
     }
-
-    .notify-card h3 {
-      color: #006b3c;
-      margin-bottom: 10px;
+    .notify-card h3 { color:#006b3c;margin-bottom:10px; }
+    .notify-form input,.notify-form select,.notify-form textarea {
+      padding:9px;border:1px solid #ccc;border-radius:6px;width:100%;
     }
-
-    .notify-form {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .notify-form select,
-    .notify-form textarea,
-    .notify-form input {
-      padding: 8px 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      width: 100%;
-    }
-
     .notify-form button {
-      background: #006b3c;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 10px 20px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background 0.3s;
-      align-self: flex-start;
+      background:#006b3c;color:#fff;border:none;border-radius:6px;
+      padding:10px 20px;font-weight:600;cursor:pointer;transition:.25s;
     }
-
-    .notify-form button:hover {
-      background: #009e58;
-    }
-
-    .notif-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
+    .notify-form button:hover { background:#009e58; }
+    .notif-list { display:flex;flex-direction:column;gap:10px;margin-top:20px; }
     .notif-item {
-      background: #f5f5f5;
-      padding: 12px 16px;
-      border-radius: 8px;
-      border-left: 5px solid #006b3c;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
+      background:#f5f5f5;padding:12px 16px;border-radius:8px;
+      border-left:5px solid #006b3c;display:flex;flex-direction:column;
     }
-
-    .notif-item h4 {
-      margin: 0;
-      font-size: 1rem;
-      color: #006b3c;
-    }
-
-    .notif-item p {
-      margin: 0;
-      font-size: 0.9rem;
-      color: #333;
-    }
-
-    .notif-item .meta {
-      font-size: 0.8rem;
-      color: #777;
-      text-align: right;
-    }
-
-    .notif-type {
-      display: inline-block;
-      background: #006b3c;
-      color: #fff;
-      font-size: 0.7rem;
-      padding: 2px 8px;
-      border-radius: 4px;
-      margin-right: 6px;
-    }
+    .notif-type {background:#006b3c;color:#fff;font-size:.7rem;padding:2px 8px;
+      border-radius:4px;margin-right:6px;}
+    .notif-item .meta { font-size:.8rem;color:#777;text-align:right; }
+    #notifyMsg { font-weight:600;margin-top:10px; }
   </style>
 </head>
+
 <body>
 
-  <!-- HEADER -->
-  <div id="header-container"></div>
+<div id="header-container"></div>
 
-  <!-- PAGE WRAPPER -->
-  <div class="app-shell">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="nav-title">Main Menu</div>
-      <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
-      <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
-      <a href="employee_list.html" class="nav-link">📋 Employee List</a>
-      <a href="attendance.html" class="nav-link">🕒 Attendance</a>
-      <a href="overtime.html" class="nav-link">⏱ Overtime</a>
-      <a href="requests.html" class="nav-link">📩 Requests</a>
-      <a href="reports.html" class="nav-link">📊 Reports</a>
-      <a href="meetings.html" class="nav-link">📅 Meetings</a>
-      <a href="notifications.html" class="nav-link active">🔔 Notifications</a>
-      <a href="settings.html" class="nav-link">⚙ Settings</a>
-    </aside>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="nav-title">Main Menu</div>
+    <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+    <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
+    <a href="employee_list.html" class="nav-link">📋 Employee List</a>
+    <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+    <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+    <a href="requests.html" class="nav-link">📩 Requests</a>
+    <a href="reports.html" class="nav-link">📊 Reports</a>
+    <a href="meetings.html" class="nav-link">📅 Meetings</a>
+    <a href="notifications.html" class="nav-link active">🔔 Notifications</a>
+    <a href="settings.html" class="nav-link">⚙ Settings</a>
+  </aside>
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-      <h2>Notifications</h2>
-      <p class="section-title">View updates, alerts, and announcements</p>
+  <main class="main-content">
+    <h2>Notifications</h2>
+    <p class="section-title">Announcements, alerts & updates</p>
 
-      <!-- Send Notification (For Manager/Supervisor/Admin only) -->
-      <div class="notify-card" id="sendNotifyCard" style="display:none;">
-        <h3>Send Notification</h3>
-        <form id="notifyForm" class="notify-form">
-          <select id="notifyType" required>
-            <option value="">Select Notification Type</option>
-            <option value="General">General Announcement</option>
-            <option value="Meeting">Meeting Reminder</option>
-            <option value="Request">Request Update</option>
-            <option value="Attendance">Attendance Notice</option>
-            <option value="System">System Alert</option>
-          </select>
+    <!-- Send Notification (Only Admin/Manager/Supervisor) -->
+    <div class="notify-card" id="sendNotifyCard" style="display:none;">
+      <h3>Send Notification</h3>
+      <form id="notifyForm" class="notify-form">
+        <select id="notifyType" required>
+          <option value="">Notification Type</option>
+          <option>General</option>
+          <option>Meeting</option>
+          <option>Request</option>
+          <option>Attendance</option>
+          <option>System</option>
+        </select>
 
-          <input id="notifyTitle" type="text" placeholder="Notification Title" required />
-          <textarea id="notifyMessage" placeholder="Write notification message..." rows="3" required></textarea>
+        <input id="notifyTitle" type="text" placeholder="Title" required />
+        <textarea id="notifyMessage" placeholder="Message..." rows="3" required></textarea>
 
-          <button type="submit">📢 Send Notification</button>
-          <p id="notifyMsg" style="margin-top:10px; font-weight:600;"></p>
-        </form>
+        <button>📢 Send</button>
+        <div id="notifyMsg"></div>
+      </form>
+    </div>
+
+    <!-- All Notifications -->
+    <div class="notify-card">
+      <h3>All Notifications</h3>
+      <div id="notifList" class="notif-list">
+        <p>Loading...</p>
       </div>
+    </div>
+  </main>
+</div>
 
-      <!-- Notification List -->
-      <div class="notify-card">
-        <h3>All Notifications</h3>
-        <div id="notifList" class="notif-list">
-          <p>Loading notifications...</p>
-        </div>
-      </div>
-    </main>
-  </div>
+<script type="module">
+  import { protectPage, attachLogout, loadUserData, db, auth } from "./app.js";
+  import {
+    collection, addDoc, onSnapshot, query, orderBy, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-  <!-- SCRIPT -->
-  <script type="module">
-    import { protectPage, attachLogout, loadUserData} from "./app.js";
-    import {
-      collection,
-      addDoc,
-      getDocs,
-      serverTimestamp,
-      orderBy,
-      query
-    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-
-    // Load Header
-    fetch("header.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("header-container").innerHTML = html;
-        const sidebar = document.querySelector(".sidebar");
-        const toggle = document.getElementById("menuToggle");
-        if (toggle && sidebar) toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
-        attachLogout();
-        loadUserData();
-      });
-
-    protectPage();
-
-    const notifList = document.getElementById("notifList");
-    const sendCard = document.getElementById("sendNotifyCard");
-    const notifCol = collection(db, "notifications");
-
-    // Show send section only for Admin, Manager, Supervisor
-    setTimeout(() => {
-      const role = window.currentUser?.role || "";
-      if (["Admin", "Manager", "Supervisor"].includes(role)) {
-        sendCard.style.display = "block";
-      }
-      loadNotifications();
-    }, 1000);
-
-    // Send notification
-    document.getElementById("notifyForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const type = document.getElementById("notifyType").value;
-      const title = document.getElementById("notifyTitle").value.trim();
-      const message = document.getElementById("notifyMessage").value.trim();
-      const user = window.currentUser;
-
-      const msgEl = document.getElementById("notifyMsg");
-
-      if (!type || !title || !message) {
-        msgEl.textContent = "⚠ Please fill all fields.";
-        msgEl.style.color = "red";
-        return;
-      }
-
-      try {
-        await addDoc(notifCol, {
-          type,
-          title,
-          message,
-          createdBy: user.firstName + " " + user.lastName,
-          createdAt: serverTimestamp()
-        });
-
-        msgEl.textContent = "✅ Notification sent!";
-        msgEl.style.color = "green";
-        document.getElementById("notifyForm").reset();
-        loadNotifications();
-      } catch (err) {
-        console.error(err);
-        msgEl.textContent = "❌ " + err.message;
-        msgEl.style.color = "red";
-      }
+  // Load header
+  fetch("header.html")
+    .then(r=>r.text())
+    .then(h=>{
+      document.getElementById("header-container").innerHTML = h;
+      const toggle=document.getElementById("menuToggle");
+      const sidebar=document.querySelector(".sidebar");
+      if(toggle && sidebar) toggle.addEventListener("click",()=>sidebar.classList.toggle("active"));
+      attachLogout();
+      loadUserData();
     });
 
-    // Load notifications
-    async function loadNotifications() {
-      const q = query(notifCol, orderBy("createdAt", "desc"));
-      const snap = await getDocs(q);
-      notifList.innerHTML = "";
+  // ✅ Page protection: all staff can view
+  protectPage();
 
-      if (snap.empty) {
-        notifList.innerHTML = "<p>No notifications found.</p>";
-        return;
-      }
+  const sendCard = document.getElementById("sendNotifyCard");
+  const notifList = document.getElementById("notifList");
+  const notifCol = collection(db,"notifications");
 
-      snap.forEach(d => {
-        const n = d.data();
-        const div = document.createElement("div");
-        div.className = "notif-item";
-        div.innerHTML = `
-          <div>
-            <span class="notif-type">${n.type}</span>
-            <h4>${n.title}</h4>
-            <p>${n.message}</p>
-          </div>
-          <div class="meta">
-            Sent by ${n.createdBy || "System"} on
-            ${n.createdAt ? new Date(n.createdAt.seconds * 1000).toLocaleString() : "Unknown"}
-          </div>
-        `;
-        notifList.appendChild(div);
-      });
+  // ✅ Show send panel ONLY if role is allowed
+  auth.onAuthStateChanged(()=>{
+    const u = window.currentUser;
+    if (u && ["Admin","Manager","Supervisor"].includes(u.role)) {
+      sendCard.style.display="block";
     }
-  </script>
+  });
+
+  // ✅ Submit notification
+  document.getElementById("notifyForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+
+    const type = notifyType.value;
+    const title = notifyTitle.value.trim();
+    const message = notifyMessage.value.trim();
+    const msgEl = document.getElementById("notifyMsg");
+
+    if(!type || !title || !message){
+      msgEl.textContent="⚠ Fill all fields"; msgEl.style.color="red"; return;
+    }
+
+    await addDoc(notifCol,{
+      type,title,message,
+      createdBy: auth.currentUser.email,
+      createdAt: serverTimestamp()
+    });
+
+    msgEl.textContent="✅ Notification Sent"; msgEl.style.color="#009e60";
+    document.getElementById("notifyForm").reset();
+  });
+
+  // ✅ Live notifications feed
+  onSnapshot(query(notifCol, orderBy("createdAt","desc")), snap=>{
+    notifList.innerHTML="";
+
+    if(snap.empty){
+      notifList.innerHTML="<p>No notifications yet.</p>";
+      return;
+    }
+
+    snap.forEach(d=>{
+      const n=d.data();
+      const div=document.createElement("div");
+      div.className="notif-item";
+      div.innerHTML=`
+        <div>
+          <span class="notif-type">${n.type}</span>
+          <h4>${n.title}</h4>
+          <p>${n.message}</p>
+        </div>
+        <div class="meta">
+          Sent by ${n.createdBy||"System"} •
+          ${n.createdAt ? new Date(n.createdAt.seconds*1000).toLocaleString() : ""}
+        </div>`;
+      notifList.appendChild(div);
+    });
+  });
+</script>
+
 </body>
 </html>
