@@ -34,7 +34,7 @@ export const db = getFirestore(app);
 
 // ✅ Login Function
 export async function login(email, password) {
-  return signInWithEmailAndPassword(auth, email, password);
+  return signInWithEmailAndPassword(auth, password);
 }
 
 // ✅ Logout Function
@@ -42,13 +42,13 @@ export async function logout() {
   return signOut(auth);
 }
 
-// ✅ Get User Role from Firestore
-export async function getUserRole(uid) {
+// ✅ Get User Role & Full Profile
+export async function getUserProfile(uid) {
   const snap = await getDoc(doc(db, "users", uid));
-  return snap.exists() ? (snap.data().role || "employee") : "employee";
+  return snap.exists() ? snap.data() : null;
 }
 
-// ✅ Protect Pages (force login)
+// ✅ Page Protection
 export function protectPage(requiredRoles = []) {
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -58,12 +58,11 @@ export function protectPage(requiredRoles = []) {
       return;
     }
 
-    if (requiredRoles.length > 0) {
-      const role = await getUserRole(user.uid);
-      if (!requiredRoles.includes(role)) {
-        alert("No access");
-        location.href = "./index.html";
-      }
+    const profile = await getUserProfile(user.uid);
+
+    if (requiredRoles.length > 0 && profile && !requiredRoles.includes(profile.role)) {
+      alert("You don't have access to this page");
+      location.href = "./index.html";
     }
 
     if (location.pathname.endsWith("login.html")) {
@@ -85,7 +84,24 @@ export async function saveAttendance(action) {
   return true;
 }
 
-// ✅ Login Form Handler
+// ✅ Access UI Elements (role + name display)
+export function attachUserInfo() {
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+
+    const data = await getUserProfile(user.uid);
+
+    const nameEl = document.querySelector("[data-user-name]");
+    const roleEl = document.querySelector("[data-user-role]");
+    const sectionEl = document.querySelector("[data-user-section]");
+
+    if (nameEl) nameEl.textContent = data?.name || "";
+    if (roleEl) roleEl.textContent = data?.role || "";
+    if (sectionEl) sectionEl.textContent = data?.section || "";
+  });
+}
+
+// ✅ Handle Login Page form
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
   if (form) {
@@ -94,24 +110,24 @@ document.addEventListener("DOMContentLoaded", () => {
       const email = form.email.value.trim();
       const password = form.password.value;
 
-      try {
-        await login(email, password);
-      } catch (err) {
-        alert(err.message);
-      }
+      try { await login(email, password); } 
+      catch (err) { alert(err.message); }
     });
   }
+
+  const logoutBtn = document.querySelector("[data-logout]");
+  if (logoutBtn) logoutBtn.onclick = logout;
 
   const btnIn = document.getElementById("btnCheckIn");
   const btnOut = document.getElementById("btnCheckOut");
 
   if (btnIn) btnIn.onclick = async () => {
-    try { await saveAttendance("checkin"); alert("✅ Checked in"); }
+    try { await saveAttendance("checkin"); alert("✅ Checked In"); }
     catch (e) { alert(e.message); }
   };
 
   if (btnOut) btnOut.onclick = async () => {
-    try { await saveAttendance("checkout"); alert("✅ Checked out"); }
+    try { await saveAttendance("checkout"); alert("✅ Checked Out"); }
     catch (e) { alert(e.message); }
   };
 });
