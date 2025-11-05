@@ -1,295 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Overtime | KPS Management System</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    .overtime-card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      max-width: 750px;
-      margin: 0 auto 30px;
-    }
+<meta charset="UTF-8">
+<title>Overtime | KPS Management System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
 
-    .overtime-card h3 {
-      color: #006b3c;
-      margin-bottom: 10px;
-    }
+<style>
+.overtime-card{
+  background:#fff;padding:20px;border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+  max-width:750px;margin:0 auto 30px;
+}
+.overtime-card h3{color:#006b3c;margin-bottom:10px;font-weight:700;}
+.overtime-form{display:flex;flex-wrap:wrap;gap:10px;}
+.overtime-form select,.overtime-form input{
+  width:48%;padding:8px;border:1px solid #ccc;
+  border-radius:6px;font-size:.9rem;
+}
+.overtime-form button{
+  background:#006b3c;color:#fff;border:none;border-radius:6px;
+  padding:10px 20px;margin-top:10px;cursor:pointer;font-weight:600;
+}
+.overtime-form button:hover{background:#009e58;}
 
-    .overtime-form {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: space-between;
-    }
-
-    .overtime-form input,
-    .overtime-form select {
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      width: 48%;
-      font-size: 0.9rem;
-    }
-
-    .overtime-form button {
-      background: #006b3c;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 10px 20px;
-      cursor: pointer;
-      margin-top: 10px;
-      font-weight: 600;
-      transition: background 0.3s;
-    }
-
-    .overtime-form button:hover {
-      background: #009e58;
-    }
-
-    .overtime-log table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    .overtime-log th, .overtime-log td {
-      border: 1px solid #e0e0e0;
-      padding: 8px 10px;
-      font-size: 0.9rem;
-    }
-
-    .overtime-log th {
-      background: #f5f5f5;
-      color: #333;
-    }
-
-    .status-approved {
-      color: green;
-      font-weight: 600;
-    }
-    .status-pending {
-      color: #d98400;
-      font-weight: 600;
-    }
-    .status-rejected {
-      color: red;
-      font-weight: 600;
-    }
-  </style>
+.overtime-log table{
+  width:100%;border-collapse:collapse;margin-top:15px;
+}
+.overtime-log th,.overtime-log td{
+  padding:8px;border:1px solid #ddd;font-size:.9rem;
+}
+.overtime-log th{background:#f5f5f5;font-weight:600;}
+.status-approved{color:#009e58;font-weight:700;}
+.status-pending{color:#d98400;font-weight:700;}
+.status-rejected{color:#d32f2f;font-weight:700;}
+</style>
 </head>
+
 <body>
 
-  <!-- HEADER -->
-  <div id="header-container"></div>
+<div id="header-container"></div>
 
-  <!-- PAGE WRAPPER -->
-  <div class="app-shell">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="nav-title">Main Menu</div>
-      <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
-      <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
-      <a href="employee_list.html" class="nav-link">📋 Employee List</a>
-      <a href="attendance.html" class="nav-link">🕒 Attendance</a>
-      <a href="overtime.html" class="nav-link active">⏱ Overtime</a>
-      <a href="requests.html" class="nav-link">📩 Requests</a>
-      <a href="reports.html" class="nav-link">📊 Reports</a>
-      <a href="meetings.html" class="nav-link">📅 Meetings</a>
-      <a href="notifications.html" class="nav-link">🔔 Notifications</a>
-      <a href="settings.html" class="nav-link">⚙ Settings</a>
-    </aside>
+<div class="app-shell">
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-      <h2>Overtime Management</h2>
-      <p class="section-title">Track and manage overtime requests</p>
+<aside class="sidebar">
+  <div class="nav-title">Main Menu</div>
+  <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+  <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
+  <a href="employee_list.html" class="nav-link">📋 Employee List</a>
+  <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+  <a href="overtime.html" class="nav-link active">⏱ Overtime</a>
+  <a href="deductions.html" class="nav-link">💸 Deductions</a>
+  <a href="requests.html" class="nav-link">📩 Requests</a>
+  <a href="reports.html" class="nav-link">📊 Reports</a>
+  <a href="settings.html" class="nav-link">⚙ Settings</a>
+</aside>
 
-      <!-- Overtime Form -->
-      <div class="overtime-card">
-        <h3>Add Manual Overtime</h3>
-        <form id="overtimeForm" class="overtime-form">
-          <select id="employeeSelect" required>
-            <option value="">Select Employee</option>
-          </select>
-          <input type="date" id="otDate" required />
-          <input type="number" id="otHours" placeholder="Enter OT hours" min="1" required />
-          <select id="otStatus" required>
-            <option value="Pending">Pending</option>
-            <option value="Approved">Approved</option>
-            <option value="Rejected">Rejected</option>
-          </select>
-          <button type="submit">➕ Add Overtime</button>
-        </form>
-        <p id="otMsg" style="margin-top:10px; font-weight:600;"></p>
-      </div>
+<main class="main-content">
 
-      <!-- Overtime Log -->
-      <div class="overtime-log">
-        <h3>Overtime Records</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Employee</th>
-              <th>Date</th>
-              <th>Hours</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="otTable">
-            <tr><td colspan="5">Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </main>
-  </div>
+<h2>Overtime Management</h2>
+<p class="section-title">Add, Approve, and Track Overtime</p>
 
-  <!-- SCRIPT -->
-  <script type="module">
-    import { protectPage, attachLogout, loadUserData} from "./app.js";
-    import {
-      collection,
-      addDoc,
-      getDocs,
-      query,
-      where,
-      updateDoc,
-      doc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+<div class="overtime-card">
+  <h3>Add Overtime Entry</h3>
 
-    // Load Header
-    fetch("header.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("header-container").innerHTML = html;
-        const sidebar = document.querySelector(".sidebar");
-        const toggle = document.getElementById("menuToggle");
-        if (toggle && sidebar) toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
-        attachLogout();
-        loadUserData();
-      });
+  <form id="overtimeForm" class="overtime-form">
+    <select id="employeeSelect" required>
+      <option value="">Select Employee</option>
+    </select>
 
-    // Role protection
-    protectPage({ roles: ["Admin", "Manager", "Supervisor"] });
+    <input type="date" id="otDate" required>
+    <input type="number" id="otHours" placeholder="Hours" min="1" required>
 
-    const otForm = document.getElementById("overtimeForm");
-    const otMsg = document.getElementById("otMsg");
-    const otTable = document.getElementById("otTable");
-    const empSelect = document.getElementById("employeeSelect");
+    <select id="otStatus" required>
+      <option value="pending">Pending</option>
+      <option value="approved">Approved</option>
+      <option value="rejected">Rejected</option>
+    </select>
 
-    const empCol = collection(db, "employees");
-    const otCol = collection(db, "overtime");
+    <button type="submit">➕ Add Overtime</button>
+  </form>
 
-    // Load employee list for dropdown
-    async function loadEmployees() {
-      const snap = await getDocs(empCol);
-      empSelect.innerHTML = '<option value="">Select Employee</option>';
-      snap.forEach(d => {
-        const e = d.data();
-        const opt = document.createElement("option");
-        opt.value = d.id;
-        opt.textContent = `${e.fullName} (${e.section})`;
-        empSelect.appendChild(opt);
-      });
+  <p id="otMsg" style="font-weight:600;margin-top:10px;"></p>
+</div>
+
+<div class="overtime-log">
+  <h3>Overtime Records</h3>
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Date</th><th>Hours</th><th>Status</th><th>Action</th></tr>
+    </thead>
+    <tbody id="otTable"><tr><td colspan="5">Loading...</td></tr></tbody>
+  </table>
+</div>
+
+</main>
+</div>
+
+<script type="module">
+import { protectPage, attachUserInfo, logout, db } from "./app.js";
+import { 
+  collection, addDoc, getDocs, deleteDoc, updateDoc, doc, serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
+protectPage(["admin","manager","supervisor"]);
+
+fetch("header.html").then(r=>r.text()).then(h=>{
+  document.getElementById("header-container").innerHTML = h;
+  attachUserInfo();
+  document.addEventListener("click",e=>{
+    if(e.target.matches("[data-logout]")) logout();
+  });
+});
+
+const empSelect=document.getElementById("employeeSelect");
+const otForm=document.getElementById("overtimeForm");
+const otMsg=document.getElementById("otMsg");
+const otTable=document.getElementById("otTable");
+
+async function loadEmployees(){
+  const snap=await getDocs(collection(db,"employees"));
+  empSelect.innerHTML='<option value="">Select Employee</option>';
+  snap.forEach(d=>{
+    const e=d.data();
+    empSelect.innerHTML+=`<option value="${d.id}">${e.fullName} (${e.section})</option>`;
+  });
+}
+
+// ➕ Add OT record
+otForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const empId=empSelect.value;
+  const date=document.getElementById("otDate").value;
+  const hours=document.getElementById("otHours").value;
+  const status=document.getElementById("otStatus").value;
+
+  if(!empId||!date||!hours){
+    otMsg.textContent="⚠ Please fill all fields"; otMsg.style.color="red"; return;
+  }
+
+  await addDoc(collection(db,"overtime"),{
+    empId,date,hours:Number(hours),status,timestamp:serverTimestamp()
+  });
+
+  otMsg.textContent="✅ Overtime recorded"; otMsg.style.color="green";
+  otForm.reset();
+  loadOTRecords();
+});
+
+// 📋 Load OT records
+async function loadOTRecords(){
+  const snap=await getDocs(collection(db,"overtime"));
+  otTable.innerHTML="";
+
+  if(snap.empty){
+    otTable.innerHTML="<tr><td colspan='5'>No overtime found</td></tr>";
+    return;
+  }
+
+  for(const d of snap.docs){
+    const ot=d.data();
+    const emp=await getDocs(collection(db,"employees"));
+    let name="Unknown";
+
+    emp.forEach(e=>{ if(e.id===ot.empId){ name=e.data().fullName }})
+
+    otTable.innerHTML+=`
+      <tr>
+        <td>${name}</td>
+        <td>${ot.date}</td>
+        <td>${ot.hours}</td>
+        <td class="status-${ot.status.toLowerCase()}">${ot.status}</td>
+        <td>
+          <button class="btn-small btn-edit" data-id="${d.id}">Edit</button>
+          <button class="btn-small btn-delete" data-id="${d.id}">Delete</button>
+        </td>
+      </tr>
+    `;
+  }
+
+  document.querySelectorAll(".btn-edit").forEach(btn=>{
+    btn.onclick=async()=>{
+      const id=btn.dataset.id;
+      const newStatus=prompt("Status: approved / rejected / pending");
+      if(newStatus){
+        await updateDoc(doc(db,"overtime",id),{status:newStatus.toLowerCase()});
+        loadOTRecords();
+      }
     }
+  });
 
-    // Add manual overtime
-    otForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const empId = empSelect.value;
-      const hours = parseFloat(document.getElementById("otHours").value);
-      const date = document.getElementById("otDate").value;
-      const status = document.getElementById("otStatus").value;
-
-      if (!empId || !hours || !date) {
-        otMsg.textContent = "Please fill all fields!";
-        otMsg.style.color = "red";
-        return;
+  document.querySelectorAll(".btn-delete").forEach(btn=>{
+    btn.onclick=async()=>{
+      if(confirm("Delete record?")){
+        await deleteDoc(doc(db,"overtime",btn.dataset.id));
+        loadOTRecords();
       }
-
-      try {
-        await addDoc(otCol, {
-          empId,
-          hours,
-          date,
-          status,
-          timestamp: serverTimestamp()
-        });
-        otMsg.textContent = "✅ Overtime added successfully!";
-        otMsg.style.color = "green";
-        loadOvertimeRecords();
-        otForm.reset();
-      } catch (err) {
-        console.error(err);
-        otMsg.textContent = "❌ " + err.message;
-        otMsg.style.color = "red";
-      }
-    });
-
-    // Load Overtime Records
-    async function loadOvertimeRecords() {
-      const snap = await getDocs(otCol);
-      otTable.innerHTML = "";
-
-      if (snap.empty) {
-        otTable.innerHTML = "<tr><td colspan='5'>No overtime records yet.</td></tr>";
-        return;
-      }
-
-      for (const d of snap.docs) {
-        const o = d.data();
-        const empRef = doc(db, "employees", o.empId);
-        const empSnap = await getDocs(query(collection(db, "employees"), where("__name__", "==", o.empId)));
-        const empName = empSnap.empty ? "Unknown" : empSnap.docs[0].data().fullName;
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${empName}</td>
-          <td>${o.date}</td>
-          <td>${o.hours}</td>
-          <td class="status-${o.status.toLowerCase()}">${o.status}</td>
-          <td>
-            <button class="btn-small btn-edit" data-id="${d.id}">Edit</button>
-            <button class="btn-small btn-delete" data-id="${d.id}">Delete</button>
-          </td>
-        `;
-        otTable.appendChild(tr);
-      }
-
-      // Edit/Approve/Reject actions
-      document.querySelectorAll(".btn-edit").forEach(btn => {
-        btn.addEventListener("click", async e => {
-          const id = e.target.getAttribute("data-id");
-          const newStatus = prompt("Enter new status: Approved / Rejected / Pending");
-          if (newStatus) {
-            await updateDoc(doc(db, "overtime", id), { status: newStatus });
-            alert("Status updated!");
-            loadOvertimeRecords();
-          }
-        });
-      });
-
-      document.querySelectorAll(".btn-delete").forEach(btn => {
-        btn.addEventListener("click", async e => {
-          const id = e.target.getAttribute("data-id");
-          if (confirm("Are you sure you want to delete this record?")) {
-            await updateDoc(doc(db, "overtime", id), { deleted: true });
-            alert("Overtime record marked deleted.");
-            loadOvertimeRecords();
-          }
-        });
-      });
     }
+  });
+}
 
-    loadEmployees();
-    loadOvertimeRecords();
-  </script>
+loadEmployees();
+loadOTRecords();
+</script>
+
 </body>
 </html>
