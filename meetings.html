@@ -5,6 +5,7 @@
   <title>Meetings | KPS Management System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
+
   <style>
     .meeting-card {
       background: #fff;
@@ -14,252 +15,213 @@
       max-width: 800px;
       margin: 0 auto 30px;
     }
-
     .meeting-card h3 {
       color: #006b3c;
       margin-bottom: 10px;
     }
-
-    .meeting-form {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .meeting-form select,
     .meeting-form input,
+    .meeting-form select,
     .meeting-form textarea {
-      padding: 8px 10px;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 8px;
       border: 1px solid #ccc;
       border-radius: 6px;
-      font-size: 0.9rem;
-      width: 100%;
     }
-
     .meeting-form button {
       background: #006b3c;
       color: #fff;
       border: none;
+      padding: 10px 18px;
       border-radius: 6px;
-      padding: 10px 20px;
       cursor: pointer;
       font-weight: 600;
-      transition: background 0.3s;
-      align-self: flex-start;
+      transition: .25s;
     }
-
-    .meeting-form button:hover {
-      background: #009e58;
+    .meeting-form button:hover { background:#009e58; }
+    table { width:100%; margin-top:15px; border-collapse:collapse; }
+    th, td { border:1px solid #e0e0e0;padding:8px;font-size:.9rem; }
+    th { background:#f5f5f5; font-weight:600; }
+    .btn-small {
+      padding:6px 10px;
+      border:none;
+      border-radius:5px;
+      font-size:.8rem;
+      cursor:pointer;
+      background:#d32f2f;
+      color:white;
     }
-
-    .meeting-log table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    .meeting-log th, .meeting-log td {
-      border: 1px solid #e0e0e0;
-      padding: 8px 10px;
-      font-size: 0.9rem;
-    }
-
-    .meeting-log th {
-      background: #f5f5f5;
-      color: #333;
-    }
-
-    .meeting-type {
-      font-weight: 600;
-      color: #006b3c;
-    }
+    .btn-small:hover { background:#ff4a4a; }
   </style>
 </head>
+
 <body>
 
-  <!-- HEADER -->
-  <div id="header-container"></div>
+<div id="header-container"></div>
 
-  <!-- PAGE WRAPPER -->
-  <div class="app-shell">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="nav-title">Main Menu</div>
-      <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
-      <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
-      <a href="employee_list.html" class="nav-link">📋 Employee List</a>
-      <a href="attendance.html" class="nav-link">🕒 Attendance</a>
-      <a href="overtime.html" class="nav-link">⏱ Overtime</a>
-      <a href="requests.html" class="nav-link">📩 Requests</a>
-      <a href="reports.html" class="nav-link">📊 Reports</a>
-      <a href="meetings.html" class="nav-link active">📅 Meetings</a>
-      <a href="notifications.html" class="nav-link">🔔 Notifications</a>
-      <a href="settings.html" class="nav-link">⚙ Settings</a>
-    </aside>
+<div class="app-shell">
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-      <h2>Meetings</h2>
-      <p class="section-title">Schedule and manage team meetings</p>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="nav-title">Main Menu</div>
+    <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+    <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
+    <a href="employee_list.html" class="nav-link">📋 Employee List</a>
+    <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+    <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+    <a href="requests.html" class="nav-link">📩 Requests</a>
+    <a href="reports.html" class="nav-link">📊 Reports</a>
+    <a href="meetings.html" class="nav-link active">📅 Meetings</a>
+    <a href="notifications.html" class="nav-link">🔔 Notifications</a>
+    <a href="settings.html" class="nav-link">⚙ Settings</a>
+  </aside>
 
-      <!-- Meeting Form -->
-      <div class="meeting-card">
-        <h3>New Meeting</h3>
-        <form id="meetingForm" class="meeting-form">
-          <select id="meetingType" required>
-            <option value="">Select Meeting Type</option>
-            <option value="Single Employee">For Single Employee</option>
-            <option value="Section">For Section</option>
-            <option value="Department">For Entire Department</option>
-          </select>
+  <!-- MAIN -->
+  <main class="main-content">
+    <h2>Meetings</h2>
+    <p class="section-title">Schedule and manage team meetings</p>
 
-          <select id="meetingSection">
-            <option value="">Select Section (if applicable)</option>
-            <option>All</option>
-            <option>Kcal Life</option>
-            <option>Kcal Lunch</option>
-            <option>Spring</option>
-            <option>Kcal Meal Plan</option>
-            <option>FuelUP</option>
-          </select>
+    <div class="meeting-card">
+      <h3>New Meeting</h3>
+      <form id="meetingForm" class="meeting-form">
 
-          <input type="text" id="meetingSubject" placeholder="Meeting Subject" required />
-          <textarea id="meetingDetails" placeholder="Meeting Details..." rows="3" required></textarea>
-          <input type="datetime-local" id="meetingDateTime" required />
+        <select id="meetingType" required>
+          <option value="">Select Meeting Type</option>
+          <option value="Single Employee">Single Employee</option>
+          <option value="Section">Section</option>
+          <option value="Department">Entire Department</option>
+        </select>
 
-          <button type="submit">📅 Schedule Meeting</button>
-          <p id="meetingMsg" style="margin-top:10px; font-weight:600;"></p>
-        </form>
-      </div>
+        <select id="meetingSection">
+          <option value="">Select Section (optional)</option>
+          <option>All</option>
+          <option>Kcal Life</option>
+          <option>Kcal Lunch</option>
+          <option>Spring</option>
+          <option>Kcal Meal Plan</option>
+          <option>FuelUP</option>
+        </select>
 
-      <!-- Meeting Log -->
-      <div class="meeting-log">
-        <h3>Upcoming Meetings</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Type</th>
-              <th>Subject</th>
-              <th>Date & Time</th>
-              <th>Section</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="meetingTable">
-            <tr><td colspan="5">Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </main>
-  </div>
+        <input id="meetingSubject" type="text" placeholder="Meeting Subject" required>
+        <textarea id="meetingDetails" placeholder="Meeting Details..." rows="3" required></textarea>
+        <input id="meetingDateTime" type="datetime-local" required>
 
-  <!-- SCRIPT -->
-  <script type="module">
-    import { protectPage, attachLogout, loadUserData} from "./app.js";
-    import {
-      collection,
-      addDoc,
-      getDocs,
-      deleteDoc,
-      doc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        <button type="submit">📅 Schedule Meeting</button>
+        <p id="meetingMsg" style="margin-top:10px;font-weight:600;"></p>
+      </form>
+    </div>
 
-    // Load Header
-    fetch("header.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("header-container").innerHTML = html;
-        const sidebar = document.querySelector(".sidebar");
-        const toggle = document.getElementById("menuToggle");
-        if (toggle && sidebar) toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
-        attachLogout();
-        loadUserData();
-      });
+    <div class="meeting-log">
+      <h3>Upcoming Meetings</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Subject</th>
+            <th>Date & Time</th>
+            <th>Section</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="meetingTable">
+          <tr><td colspan="5">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-    // Role restriction
-    protectPage({ roles: ["Admin", "Manager", "Supervisor"] });
+  </main>
+</div>
 
-    const meetingForm = document.getElementById("meetingForm");
-    const meetingMsg = document.getElementById("meetingMsg");
-    const meetingTable = document.getElementById("meetingTable");
-    const meetingsCol = collection(db, "meetings");
 
-    // Add new meeting
-    meetingForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
+<!-- SCRIPT -->
+<script type="module">
+  import { protectPage, attachLogout, loadUserData, db, auth } from "./app.js";
+  import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } 
+    from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-      const type = document.getElementById("meetingType").value;
-      const section = document.getElementById("meetingSection").value;
-      const subject = document.getElementById("meetingSubject").value.trim();
-      const details = document.getElementById("meetingDetails").value.trim();
-      const dateTime = document.getElementById("meetingDateTime").value;
-      const user = window.currentUser;
-
-      if (!type || !subject || !dateTime) {
-        meetingMsg.textContent = "Please fill all required fields.";
-        meetingMsg.style.color = "red";
-        return;
-      }
-
-      try {
-        await addDoc(meetingsCol, {
-          type,
-          section,
-          subject,
-          details,
-          dateTime,
-          createdBy: user.firstName + " " + user.lastName,
-          createdAt: serverTimestamp()
-        });
-
-        meetingMsg.textContent = "✅ Meeting scheduled successfully!";
-        meetingMsg.style.color = "green";
-        meetingForm.reset();
-        loadMeetings();
-      } catch (err) {
-        console.error(err);
-        meetingMsg.textContent = "❌ " + err.message;
-        meetingMsg.style.color = "red";
-      }
+  // load header
+  fetch("header.html")
+    .then(r=>r.text())
+    .then(h=>{
+      document.getElementById("header-container").innerHTML=h;
+      const sidebar=document.querySelector(".sidebar");
+      const toggle=document.getElementById("menuToggle");
+      if(toggle && sidebar) toggle.addEventListener("click",()=> sidebar.classList.toggle("active"));
+      attachLogout();
+      loadUserData();
     });
 
-    // Load meetings
-    async function loadMeetings() {
-      const snap = await getDocs(meetingsCol);
-      meetingTable.innerHTML = "";
+  // ✅ Correct role protection
+  protectPage(["Admin","Manager","Supervisor"]);
 
-      if (snap.empty) {
-        meetingTable.innerHTML = "<tr><td colspan='5'>No meetings scheduled yet.</td></tr>";
-        return;
-      }
+  const meetingForm = document.getElementById("meetingForm");
+  const meetingMsg  = document.getElementById("meetingMsg");
+  const meetingTable = document.getElementById("meetingTable");
+  const meetingsCol = collection(db, "meetings");
 
-      snap.forEach(d => {
-        const m = d.data();
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="meeting-type">${m.type}</td>
-          <td>${m.subject}</td>
-          <td>${new Date(m.dateTime).toLocaleString()}</td>
-          <td>${m.section || "All"}</td>
-          <td><button class="btn-small btn-delete" data-id="${d.id}">Cancel</button></td>
-        `;
-        meetingTable.appendChild(tr);
-      });
+  // ✅ Add Meeting
+  meetingForm.addEventListener("submit", async e=>{
+    e.preventDefault();
 
-      // Delete meeting
-      document.querySelectorAll(".btn-delete").forEach(btn => {
-        btn.addEventListener("click", async e => {
-          const id = e.target.getAttribute("data-id");
-          if (confirm("Are you sure you want to cancel this meeting?")) {
-            await deleteDoc(doc(db, "meetings", id));
-            loadMeetings();
-          }
-        });
-      });
+    const type = meetingType.value;
+    const section = meetingSection.value;
+    const subject = meetingSubject.value.trim();
+    const details = meetingDetails.value.trim();
+    const dateTime = meetingDateTime.value;
+
+    if(!type || !subject || !dateTime){
+      meetingMsg.textContent="Please fill all required fields.";
+      meetingMsg.style.color="red";
+      return;
     }
 
+    await addDoc(meetingsCol,{
+      type, section, subject, details, dateTime,
+      createdBy: auth.currentUser.email,
+      createdAt: serverTimestamp()
+    });
+
+    meetingMsg.textContent="✅ Meeting scheduled!";
+    meetingMsg.style.color="green";
+    meetingForm.reset();
     loadMeetings();
-  </script>
+  });
+
+  // ✅ Load meetings
+  async function loadMeetings(){
+    const snap = await getDocs(meetingsCol);
+    meetingTable.innerHTML="";
+
+    if(snap.empty){
+      meetingTable.innerHTML="<tr><td colspan='5'>No meetings yet.</td></tr>";
+      return;
+    }
+
+    snap.forEach(d=>{
+      const m=d.data();
+      const row=document.createElement("tr");
+      row.innerHTML=`
+      <td>${m.type}</td>
+      <td>${m.subject}</td>
+      <td>${new Date(m.dateTime).toLocaleString()}</td>
+      <td>${m.section||"All"}</td>
+      <td><button class='btn-small' data-id='${d.id}'>Cancel</button></td>
+      `;
+      meetingTable.appendChild(row);
+    });
+
+    document.querySelectorAll(".btn-small").forEach(btn=>{
+      btn.addEventListener("click",async e=>{
+        if(confirm("Cancel this meeting?")){
+          await deleteDoc(doc(db,"meetings", e.target.dataset.id));
+          loadMeetings();
+        }
+      });
+    });
+  }
+
+  loadMeetings();
+</script>
+
 </body>
 </html>
