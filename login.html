@@ -38,32 +38,20 @@
 </div>
 
 <script type="module">
-import { auth, login } from "./app.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+import { login } from "./app.js";
 
 document.getElementById("loginForm").addEventListener("submit", async(e)=>{
   e.preventDefault();
-  const email = email.value.trim();
-  const password = password.value.trim();
-  const msg=document.getElementById("msg");
-
-  msg.textContent="Checking...";
-  msg.style.color="#444";
+  
+  const email = loginForm.email.value;
+  const password = loginForm.password.value;
 
   try {
-    await login(email,password);
-    msg.textContent="✅ Login Success";
-    msg.style.color="green";
-    setTimeout(()=>location.href="dashboard.html",800);
-  } catch(err){
-    msg.textContent="❌ "+err.message;
-    msg.style.color="red";
+    await login(email, password);
+    window.location.href = "dashboard.html"; // ✅ redirect
+  } catch(err) {
+    alert("Login failed ❌\n" + err.message);
   }
-});
-
-// if logged in → go dashboard
-onAuthStateChanged(auth,(user)=>{
-  if(user) location.href="dashboard.html";
 });
 </script>
 
