@@ -1,151 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KPS Login | Kcal Packaging System</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>KPS Login</title>
 
-<style>
-/* ===== LOGIN PAGE STYLES ===== */
-body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(145deg, #006b3c, #00a65a);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-}
-
-.login-container {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  width: 100%;
-  max-width: 380px;
-  padding: 30px 28px;
-  text-align: center;
-  animation: fadeIn 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(25px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.login-logo img {
-  width: 68px;
-  margin-bottom: 8px;
-}
-
-.login-title {
-  color: #006b3c;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.login-subtitle {
-  color: #444;
-  font-size: 0.88rem;
-  margin-bottom: 22px;
-}
-
-label {
-  font-size: 0.82rem;
-  font-weight: bold;
-  text-align: left;
-  display: block;
-  margin-bottom: 6px;
-  color: #004d2b;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  margin-bottom: 14px;
-  font-size: 0.9rem;
-}
-
-button {
-  background: #006b3c;
-  color: #fff;
-  width: 100%;
-  border: none;
-  padding: 11px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.2s;
-}
-
-button:hover {
-  background: #00944d;
-}
-
-.login-footer {
-  font-size: 0.8rem;
-  color: #666;
-  margin-top: 16px;
-}
-.login-footer strong{
-  color:#006b3c;
-}
-</style>
-
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f6f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-box {
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 350px;
+      text-align: center;
+    }
+    .login-box h2 {
+      color: #006b3c;
+      margin-bottom: 15px;
+    }
+    .login-box input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .login-box button {
+      width: 100%;
+      background: #006b3c;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .login-box button:hover { background: #009a56; }
+  </style>
 </head>
 
 <body>
-
-<div class="login-container">
-    <div class="login-logo">
-      <img src="assets/logo.png" alt="Kcal Logo" />
-    </div>
-
-    <div class="login-title">KPS Management System</div>
-    <div class="login-subtitle">Healthy Eat, Healthy Life</div>
+  <div class="login-box">
+    <h2>KPS Login</h2>
 
     <form id="loginForm">
-      <label>Email Address</label>
-      <input type="email" id="email" placeholder="Enter email" required />
-
-      <label>Password</label>
-      <input type="password" id="password" placeholder="Enter password" required />
-
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password" required>
       <button type="submit">Login</button>
     </form>
 
-    <div class="login-footer">
-      © 2025 <strong>Haroon Iqbal</strong> · Kcal Packaging
-    </div>
-</div>
+    <p id="loginMsg" style="font-weight:600;margin-top:10px;"></p>
+  </div>
 
-<!-- Load Firebase + App -->
-<script type="module" src="./app.js"></script>
+  <script type="module">
+    import { login } from "./app.js";
 
-<!-- Login Handler -->
-<script type="module">
-import { login, protectPage } from "./app.js";
+    const form = document.getElementById("loginForm");
+    const msg = document.getElementById("loginMsg");
 
-// If already logged in, redirect
-protectPage();
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const email = email.value.trim();
-  const password = password.value;
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
 
-  try { 
-  await login(email, password);
-  window.location.href = "dashboard.html";
-} catch (err) { 
-  alert("Login failed: " + err.message);
-}
+      msg.textContent = "Checking...";
+      msg.style.color = "black";
 
-});
-</script>
+      try {
+        await login(email, password);
+        msg.textContent = "✅ Login successful";
+        msg.style.color = "green";
 
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 700);
+
+      } catch (error) {
+        msg.textContent = "❌ " + error.message;
+        msg.style.color = "red";
+      }
+    });
+  </script>
 </body>
 </html>
