@@ -56,7 +56,7 @@ export function protectPage(roles = []) {
       }
       return;
     }
-
+    
     const profile = await getUserProfile(user.uid);
 
     if (roles.length > 0 && profile && !roles.includes(profile.role)) {
