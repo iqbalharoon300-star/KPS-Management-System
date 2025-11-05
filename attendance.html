@@ -1,281 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Attendance | KPS Management System</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    .attendance-card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      max-width: 700px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .attendance-card h3 {
-      margin-bottom: 15px;
-      color: #006b3c;
-    }
-    .attendance-actions {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 15px;
-    }
-    .btn-check {
-      background: #006b3c;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 10px 18px;
-      cursor: pointer;
-      transition: background 0.25s ease;
-    }
-    .btn-check:hover { background: #009e58; }
+<meta charset="UTF-8">
+<title>Attendance | KPS Management System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="style.css" />
 
-    .status-select {
-      margin-top: 15px;
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-
-    .attendance-log {
-      margin-top: 25px;
-      text-align: left;
-    }
-    .attendance-log table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .attendance-log th, .attendance-log td {
-      border: 1px solid #e0e0e0;
-      padding: 8px 10px;
-      font-size: 0.9rem;
-      text-align: left;
-    }
-    .attendance-log th {
-      background: #f5f5f5;
-      color: #333;
-    }
-  </style>
+<style>
+.attendance-card {
+  background:#fff;padding:20px;border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+  max-width:700px;margin:0 auto;text-align:center;
+}
+.attendance-card h3{color:#006b3c;margin-bottom:12px}
+.btn-check {
+  background:#006b3c;color:#fff;border:none;border-radius:6px;
+  padding:10px 18px;margin:8px;cursor:pointer;
+}
+.btn-check:hover{background:#009e58}
+.attendance-log table{
+  width:100%;border-collapse:collapse;margin-top:18px;
+}
+.attendance-log th,.attendance-log td{
+  border:1px solid #ddd;padding:8px;font-size:.9rem;
+}
+.attendance-log th{background:#f5f5f5;font-weight:600}
+</style>
 </head>
+
+<body>
+
 <!-- HEADER -->
-<body>  
- <div id="header-container"></div>
+<div id="header-container"></div>
 
-  <!-- PAGE WRAPPER -->
-  <div class="app-shell">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="nav-title">Main Menu</div>
-      <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
-      <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
-      <a href="employee_list.html" class="nav-link">📋 Employee List</a>
-      <a href="attendance.html" class="nav-link active">🕒 Attendance</a>
-      <a href="overtime.html" class="nav-link">⏱ Overtime</a>
-      <a href="requests.html" class="nav-link">📩 Requests</a>
-      <a href="reports.html" class="nav-link">📊 Reports</a>
-      <a href="meetings.html" class="nav-link">📅 Meetings</a>
-      <a href="notifications.html" class="nav-link">🔔 Notifications</a>
-      <a href="settings.html" class="nav-link">⚙ Settings</a>
-    </aside>
+<div class="app-shell">
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-      <h2>Attendance</h2>
-      <p class="section-title">Mark your daily attendance or manage your team</p>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="nav-title">Main Menu</div>
+  <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+  <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
+  <a href="employee_list.html" class="nav-link">📋 Employee List</a>
+  <a href="attendance.html" class="nav-link active">🕒 Attendance</a>
+  <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+  <a href="deductions.html" class="nav-link">💸 Deductions</a>
+  <a href="requests.html" class="nav-link">📩 Requests</a>
+  <a href="reports.html" class="nav-link">📊 Reports</a>
+  <a href="settings.html" class="nav-link">⚙ Settings</a>
+</aside>
 
-      <!-- Attendance Card -->
-      <div class="attendance-card">
-        <h3 id="attendanceTitle">Mark Attendance</h3>
-        <p><strong>Date:</strong> <span id="todayDate"></span></p>
-        <p><strong>Time:</strong> <span id="currentTime"></span></p>
+<!-- MAIN -->
+<main class="main-content">
 
-        <div class="attendance-actions">
-          <button id="checkInBtn" class="btn-check">✅ Check In</button>
-          <button id="checkOutBtn" class="btn-check">🚪 Check Out</button>
-        </div>
+<h2>Attendance</h2>
+<p class="section-title">Employee Attendance Tracking</p>
 
-        <div class="status-select-wrapper">
-          <select id="attendanceStatus" class="status-select">
-            <option value="present">Present</option>
-            <option value="absent">Absent</option>
-            <option value="sick">Sick Leave</option>
-            <option value="annual">Annual Leave</option>
-            <option value="dayoff">Day Off</option>
-            <option value="ph">Public Holiday</option>
-          </select>
-        </div>
+<div class="attendance-card">
+  <h3>Mark Attendance</h3>
 
-        <p id="attMsg" style="margin-top:10px; font-weight:600;"></p>
-      </div>
+  <p>📅 <span id="todayDate"></span></p>
+  <p>⏰ <span id="currentTime"></span></p>
 
-      <!-- Attendance Log Table -->
-      <div class="attendance-log">
-        <h3>Today's Attendance Log</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Employee</th>
-              <th>Status</th>
-              <th>Check-In</th>
-              <th>Check-Out</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="attendanceTable">
-            <tr><td colspan="5">Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </main>
-  </div>
+  <button id="btnCheckIn" class="btn-check">✅ Check In</button>
+  <button id="btnCheckOut" class="btn-check">🚪 Check Out</button>
 
-  <!-- SCRIPT -->
-  <script type="module">
-    import { protectPage, attachLogout, loadUserData,} from "./app.js";
-    import {
-      collection,
-      addDoc,
-      getDocs,
-      query,
-      where,
-      updateDoc,
-      doc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+  <p id="attMsg" style="font-weight:600;margin-top:10px;"></p>
+</div>
 
-    // Load Header
-    fetch("header.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("header-container").innerHTML = html;
+<div class="attendance-log">
+  <h3>Today's Records</h3>
+  <table>
+    <thead><tr>
+      <th>Name</th><th>Action</th><th>Time</th>
+    </tr></thead>
+    <tbody id="attendanceTable">
+      <tr><td colspan="3">Loading...</td></tr>
+    </tbody>
+  </table>
+</div>
 
-        const sidebar = document.querySelector(".sidebar");
-        const toggle = document.getElementById("menuToggle");
-        if (toggle && sidebar) toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
+</main>
+</div>
 
-        attachLogout();
-        loadUserData();
-      });
+<script type="module">
+import { auth, db, protectPage, attachUserInfo, saveAttendance } from "./app.js";
+import { collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-    protectPage();
+// ✅ protect page
+protectPage();
 
-    // Update current time
-    function updateTime() {
-      const now = new Date();
-      document.getElementById("currentTime").textContent = now.toLocaleTimeString();
-      document.getElementById("todayDate").textContent = now.toISOString().slice(0, 10);
-    }
-    setInterval(updateTime, 1000);
-    updateTime();
+// ✅ load header
+fetch("header.html").then(r=>r.text()).then(h=>{
+  document.getElementById("header-container").innerHTML = h;
+  attachUserInfo();
+});
 
-    // Firestore reference
-    const attCol = collection(db, "attendance");
-    const attMsg = document.getElementById("attMsg");
+// ✅ live date/time
+setInterval(()=>{
+  const d=new Date();
+  document.getElementById("todayDate").innerText = d.toISOString().split("T")[0];
+  document.getElementById("currentTime").innerText = d.toLocaleTimeString();
+},1000);
 
-    async function markAttendance(status) {
-      const user = window.currentUser;
-      if (!user) {
-        attMsg.textContent = "User not found or not logged in.";
-        attMsg.style.color = "red";
-        return;
-      }
+// ✅ buttons
+document.getElementById("btnCheckIn").onclick = async()=>{
+  try{
+    await saveAttendance("checkin");
+    document.getElementById("attMsg").textContent = "✅ Checked In!";
+    loadTodayLogs();
+  }catch(e){ alert(e.message);}
+};
 
-      try {
-        await addDoc(attCol, {
-          uid: user.uid,
-          userName: user.firstName + " " + user.lastName,
-          status,
-          dateKey: new Date().toISOString().slice(0, 10),
-          timestamp: serverTimestamp(),
-          checkIn: status === "present" ? new Date().toLocaleTimeString() : null,
-          checkOut: null
-        });
+document.getElementById("btnCheckOut").onclick = async()=>{
+  try{
+    await saveAttendance("checkout");
+    document.getElementById("attMsg").textContent = "✅ Checked Out!";
+    loadTodayLogs();
+  }catch(e){ alert(e.message);}
+};
 
-        attMsg.textContent = "✅ Attendance marked as " + status.toUpperCase();
-        attMsg.style.color = "green";
-        loadAttendanceLog();
-      } catch (err) {
-        console.error(err);
-        attMsg.textContent = "❌ " + err.message;
-        attMsg.style.color = "red";
-      }
-    }
+// ✅ load today logs
+async function loadTodayLogs(){
+  const today = new Date().toISOString().split("T")[0];
+  const q = query(collection(db,"attendance"), where("date", "==", today), orderBy("timestamp","desc"));
+  const snap = await getDocs(q);
+  const tbody = document.getElementById("attendanceTable");
 
-    document.getElementById("checkInBtn").addEventListener("click", () => {
-      const status = document.getElementById("attendanceStatus").value;
-      markAttendance(status);
-    });
+  if(snap.empty){ tbody.innerHTML="<tr><td colspan=3>No records</td></tr>"; return;}
 
-    document.getElementById("checkOutBtn").addEventListener("click", async () => {
-      const user = window.currentUser;
-      const today = new Date().toISOString().slice(0, 10);
+  tbody.innerHTML="";
+  snap.forEach(doc=>{
+    const d = doc.data();
+    tbody.innerHTML += `
+      <tr>
+        <td>${d.userName || "User"}</td>
+        <td>${d.action}</td>
+        <td>${new Date(d.timestamp.seconds*1000).toLocaleTimeString()}</td>
+      </tr>`;
+  });
+}
 
-      const q = query(attCol, where("uid", "==", user.uid), where("dateKey", "==", today));
-      const snap = await getDocs(q);
-      if (snap.empty) {
-        attMsg.textContent = "No Check-In record found!";
-        attMsg.style.color = "red";
-        return;
-      }
+loadTodayLogs();
 
-      const docRef = doc(db, "attendance", snap.docs[0].id);
-      await updateDoc(docRef, { checkOut: new Date().toLocaleTimeString() });
-      attMsg.textContent = "✅ Check-Out updated!";
-      attMsg.style.color = "green";
-      loadAttendanceLog();
-    });
-
-    // Load Attendance Log (Today)
-    async function loadAttendanceLog() {
-      const today = new Date().toISOString().slice(0, 10);
-      const q = query(attCol, where("dateKey", "==", today));
-      const snap = await getDocs(q);
-      const table = document.getElementById("attendanceTable");
-
-      if (snap.empty) {
-        table.innerHTML = "<tr><td colspan='5'>No records yet.</td></tr>";
-        return;
-      }
-
-      table.innerHTML = "";
-      snap.forEach(d => {
-        const a = d.data();
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${a.userName || "N/A"}</td>
-          <td>${a.status || "N/A"}</td>
-          <td>${a.checkIn || "-"}</td>
-          <td>${a.checkOut || "-"}</td>
-          <td>
-            <button class="btn-small btn-edit" data-id="${d.id}">Edit</button>
-            <button class="btn-small btn-delete" data-id="${d.id}">Reset</button>
-          </td>
-        `;
-        table.appendChild(tr);
-      });
-
-      // Edit / Reset
-      document.querySelectorAll(".btn-delete").forEach(btn => {
-        btn.addEventListener("click", async e => {
-          const id = e.target.getAttribute("data-id");
-          const ref = doc(db, "attendance", id);
-          await updateDoc(ref, { checkIn: null, checkOut: null, status: "reset" });
-          alert("Day reset successfully!");
-          loadAttendanceLog();
-        });
-      });
-    }
-
-    loadAttendanceLog();
-
-  </script>
+</script>
 
 </body>
 </html>
