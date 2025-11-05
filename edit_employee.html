@@ -12,6 +12,7 @@
 
   <!-- PAGE WRAPPER -->
   <div class="app-shell">
+    
     <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="nav-title">Main Menu</div>
@@ -34,14 +35,17 @@
 
       <form id="editEmployeeForm" class="kps-form">
         <div class="kps-form-row">
+
           <div>
             <label for="uid">Employee UID</label>
             <input type="text" id="uid" readonly />
           </div>
+
           <div>
             <label for="fullName">Full Name</label>
-            <input type="text" id="fullName" placeholder="Employee full name" required />
+            <input type="text" id="fullName" required />
           </div>
+
           <div>
             <label for="role">Role</label>
             <select id="role" required>
@@ -53,6 +57,7 @@
               <option>Packer</option>
             </select>
           </div>
+
           <div>
             <label for="section">Section</label>
             <select id="section" required>
@@ -64,6 +69,7 @@
               <option>FuelUP</option>
             </select>
           </div>
+
           <div>
             <label for="shift">Shift</label>
             <select id="shift" required>
@@ -72,42 +78,40 @@
               <option>Both</option>
             </select>
           </div>
+
           <div>
             <label for="joiningDate">Joining Date</label>
             <input type="date" id="joiningDate" required />
           </div>
+
           <div>
             <label for="email">Email</label>
             <input type="email" id="email" required />
           </div>
+
           <div>
             <label for="phone">Phone Number</label>
             <input type="text" id="phone" required />
           </div>
+
           <div>
             <label for="photo">Profile Picture (optional)</label>
             <input type="file" id="photo" accept="image/*" />
           </div>
         </div>
+
         <button type="submit" class="btn-action">💾 Update Employee</button>
         <p id="statusMsg" style="margin-top:10px; font-weight:600;"></p>
+
       </form>
     </main>
   </div>
 
-  <!-- LOAD HEADER + LOGOUT + FIREBASE LOGIC -->
+  <!-- SCRIPT -->
   <script type="module">
     import { protectPage, attachLogout, loadUserData, db, storage } from "./app.js";
-    import {
-      doc,
-      getDoc,
-      updateDoc
-    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-    import {
-      ref,
-      uploadBytes,
-      getDownloadURL
-    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
+    import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+    import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
     // Load header
     fetch("header.html")
@@ -116,34 +120,25 @@
         document.getElementById("header-container").innerHTML = html;
         const sidebar = document.querySelector(".sidebar");
         const toggle = document.getElementById("menuToggle");
-        if (toggle && sidebar) {
-          toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
-        }
+        if (toggle && sidebar) toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
         attachLogout();
         loadUserData();
       });
 
-    // Protect page (Admin / Manager / Supervisor only)
-    protectPage({ roles: ["Admin", "Manager", "Supervisor"] });
+    // ✅ Correct role protection
+    protectPage(["Admin", "Manager", "Supervisor"]);
 
-    // Get employee UID from URL
     const params = new URLSearchParams(window.location.search);
     const empId = params.get("id");
     const form = document.getElementById("editEmployeeForm");
     const msg = document.getElementById("statusMsg");
 
     async function loadEmployeeData() {
-      if (!empId) {
-        msg.textContent = "Invalid Employee ID.";
-        msg.style.color = "red";
-        return;
-      }
-
       const empRef = doc(db, "employees", empId);
       const empSnap = await getDoc(empRef);
 
       if (!empSnap.exists()) {
-        msg.textContent = "Employee not found!";
+        msg.textContent = "Employee not found";
         msg.style.color = "red";
         return;
       }
@@ -161,46 +156,46 @@
 
     loadEmployeeData();
 
-    // Update employee info
+    // ✅ Update employee
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       msg.textContent = "Updating...";
-      msg.style.color = "#333";
+      msg.style.color = "#006b3c";
 
       try {
         const empRef = doc(db, "employees", empId);
 
         const updatedData = {
-          fullName: document.getElementById("fullName").value.trim(),
-          role: document.getElementById("role").value,
-          section: document.getElementById("section").value,
-          shift: document.getElementById("shift").value,
-          joiningDate: document.getElementById("joiningDate").value,
-          email: document.getElementById("email").value.trim(),
-          phone: document.getElementById("phone").value.trim(),
+          fullName: fullName.value.trim(),
+          role: role.value,
+          section: section.value,
+          shift: shift.value,
+          joiningDate: joiningDate.value,
+          email: email.value.trim(),
+          phone: phone.value.trim(),
         };
 
-        // Optional photo upload
         const file = document.getElementById("photo").files[0];
         if (file) {
           const photoRef = ref(storage, `employee_photos/${empId}_${file.name}`);
           await uploadBytes(photoRef, file);
-          const photoURL = await getDownloadURL(photoRef);
-          updatedData.photoURL = photoURL;
+          updatedData.photoURL = await getDownloadURL(photoRef);
         }
 
         await updateDoc(empRef, updatedData);
 
-        msg.textContent = "✅ Employee updated successfully!";
+        msg.textContent = "✅ Updated successfully!";
         msg.style.color = "green";
+
         setTimeout(() => (window.location.href = "employee_list.html"), 1200);
+
       } catch (err) {
-        console.error(err);
         msg.textContent = "❌ " + err.message;
         msg.style.color = "red";
       }
     });
   </script>
+
 </body>
 </html>
