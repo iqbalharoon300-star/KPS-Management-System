@@ -1,149 +1,116 @@
-// ======================================================
-// KPS Management System – app.js (Version 2)
-// Compatible with Firebase v10.13.0
-// ======================================================
+// app.js (ES Modules, v10+ SDK)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+import { 
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut 
+} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+import { 
+  getFirestore, doc, getDoc, setDoc, addDoc, collection, serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import {
-  getFirestore,
-  doc,
-  getDoc
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-
-// ------------------------------------------------------
-// 🔹 Firebase Configuration
-// ------------------------------------------------------
+// ✅ Replace with your exact values from Firebase Console
 const firebaseConfig = {
   apiKey: "AIzaSyB0fPDZpHEjxc7IMFd_f0_BrvTgqGJhySA",
   authDomain: "kcal-packaging-workforce.firebaseapp.com",
   projectId: "kcal-packaging-workforce",
-  storageBucket: "kcal-packaging-workforce.firebasestorage.app",
+  // IMPORTANT: bucket name, not a URL
+  storageBucket: "kcal-packaging-workforce.appspot.com",
   messagingSenderId: "1025039246589",
   appId: "1:1025039246589:web:ce37f12ec000bc03e4ca94",
   measurementId: "G-7EN3V2W0QW"
 };
 
-// ------------------------------------------------------
-// 🔹 Initialize Firebase
-// ------------------------------------------------------
+// Init
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
 
-// ======================================================
-// 🔹 LOGIN FUNCTION (index.html)
-// ======================================================
-const loginForm = document.getElementById("loginForm");
-if (loginForm) {
-  loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // Fetch user data from Firestore
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (userSnap.exists()) {
-        localStorage.setItem("kpsUser", JSON.stringify(userSnap.data()));
-        window.location.href = "dashboard.html";
-      } else {
-        alert("Access denied! You are not registered in the KPS system.");
-        await signOut(auth);
-      }
-    } catch (error) {
-      console.error("Login error:", error.message);
-      alert("Invalid email or password. Please try again.");
-    }
-  });
+// ------- Auth helpers (basic email/password) -------
+export async function login(email, password) {
+  return signInWithEmailAndPassword(auth, email, password);
 }
 
-// ======================================================
-// 🔹 AUTH PROTECTION (used on every page except login)
-// ======================================================
-export function protectPage() {
+export async function logout() {
+  return signOut(auth);
+}
+
+// Optional: read role from Firestore: users/{uid}.role -> "admin"|"manager"|"supervisor"|"employee"
+export async function getUserRole(uid) {
+  const snap = await getDoc(doc(db, "users", uid));
+  return snap.exists() ? (snap.data().role || "employee") : "employee";
+}
+
+// Guard pages (redirect to login if signed out)
+export function protectPage(requiredRoles = []) {
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
-      window.location.href = "index.html";
+      // Not logged in → go to login.html (adjust path if needed)
+      if (!location.pathname.endsWith("login.html")) {
+        location.href = "./login.html";
+      }
       return;
     }
 
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-      alert("Access denied! You are not registered in the KPS system.");
-      await signOut(auth);
-      window.location.href = "index.html";
-      return;
+    // If page requires a role, check it
+    if (requiredRoles.length > 0) {
+      const role = await getUserRole(user.uid);
+      if (!requiredRoles.includes(role)) {
+        // No permission → send to a safe page
+        alert("You don't have access to this page.");
+        location.href = "./index.html";
+      }
     }
 
-    const userData = userSnap.data();
-    localStorage.setItem("kpsUser", JSON.stringify(userData));
-
-    // Update UI (header info)
-    const userNameEl = document.getElementById("userName");
-    const userRoleEl = document.getElementById("userRole");
-    const userPhotoEl = document.getElementById("userPhoto");
-
-    if (userNameEl) userNameEl.textContent = userData.Name || "User";
-    if (userRoleEl) userRoleEl.textContent =
-      `${userData.Role || "Role"} | ${userData.Section || "Section"}`;
-    if (userPhotoEl && userData.PhotoURL) userPhotoEl.src = userData.PhotoURL;
+    // If we’re on login and already signed in, go to dashboard
+    if (location.pathname.endsWith("login.html")) {
+      location.href = "./index.html";
+    }
   });
 }
 
-// ======================================================
-// 🔹 LOGOUT FUNCTION (header button)
-// ======================================================
-export function attachLogout() {
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", async () => {
-      await signOut(auth);
-      localStorage.removeItem("kpsUser");
-      window.location.href = "index.html";
+// ------- Example: Attendance save for current user -------
+export async function saveAttendance(action) {
+  // action: "checkin" | "checkout"
+  const user = auth.currentUser;
+  if (!user) throw new Error("Not signed in");
+
+  const payload = {
+    userId: user.uid,
+    action,                 // checkin/checkout
+    timestamp: serverTimestamp(),
+    // You can add more fields: shift, section, device, note...
+  };
+
+  await addDoc(collection(db, "attendance"), payload);
+  return true;
+}
+
+// ------- Wire up a simple login form if present -------
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("loginForm");
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = form.email.value.trim();
+      const password = form.password.value;
+
+      try {
+        await login(email, password);
+        // onAuthStateChanged will redirect
+      } catch (err) {
+        alert(err.message);
+      }
     });
   }
-}
 
-// ======================================================
-// 🔹 AUTO LOAD USER DATA (Dashboard greeting, etc.)
-// ======================================================
-export function loadUserData() {
-  const userData = JSON.parse(localStorage.getItem("kpsUser") || "{}");
-
-  const userNameEl = document.getElementById("userName");
-  const userRoleEl = document.getElementById("userRole");
-  const userPhotoEl = document.getElementById("userPhoto");
-
-  if (userNameEl) userNameEl.textContent = userData.Name || "User";
-  if (userRoleEl) userRoleEl.textContent =
-    `${userData.Role || "Role"} | ${userData.Section || "Section"}`;
-  if (userPhotoEl && userData.PhotoURL) userPhotoEl.src = userData.PhotoURL;
-
-  // Optional: Greeting (Good Morning, etc.)
-  const hour = new Date().getHours();
-  let greeting =
-    hour < 12
-      ? "Good Morning"
-      : hour < 18
-      ? "Good Afternoon"
-      : "Good Evening";
-
-  if (document.getElementById("greetingMessage") && userData.Name) {
-    document.getElementById("greetingMessage").textContent =
-      `${greeting}, ${userData.Name}!`;
-  }
-}
+  // Example: attach buttons if they exist
+  const btnIn = document.getElementById("btnCheckIn");
+  const btnOut = document.getElementById("btnCheckOut");
+  if (btnIn) btnIn.onclick = async () => {
+    try { await saveAttendance("checkin"); alert("Checked in"); } 
+    catch (e) { alert(e.message); }
+  };
+  if (btnOut) btnOut.onclick = async () => {
+    try { await saveAttendance("checkout"); alert("Checked out"); } 
+    catch (e) { alert(e.message); }
+  };
+});
