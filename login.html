@@ -1,39 +1,146 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>KPS Login</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KPS Login | Kcal Packaging System</title>
+  <link rel="stylesheet" href="style.css" />
+
+<style>
+/* ===== LOGIN PAGE STYLES ===== */
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(145deg, #006b3c, #00a65a);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.login-container {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 380px;
+  padding: 30px 28px;
+  text-align: center;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(25px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-logo img {
+  width: 68px;
+  margin-bottom: 8px;
+}
+
+.login-title {
+  color: #006b3c;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.login-subtitle {
+  color: #444;
+  font-size: 0.88rem;
+  margin-bottom: 22px;
+}
+
+label {
+  font-size: 0.82rem;
+  font-weight: bold;
+  text-align: left;
+  display: block;
+  margin-bottom: 6px;
+  color: #004d2b;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+}
+
+button {
+  background: #006b3c;
+  color: #fff;
+  width: 100%;
+  border: none;
+  padding: 11px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #00944d;
+}
+
+.login-footer {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 16px;
+}
+.login-footer strong{
+  color:#006b3c;
+}
+</style>
+
 </head>
+
 <body>
-  <h1>Welcome to KPS</h1>
 
-  <form id="loginForm">
-      <input type="email" id="email" placeholder="Email" required>
-      <input type="password" id="password" placeholder="Password" required>
+<div class="login-container">
+    <div class="login-logo">
+      <img src="assets/logo.png" alt="Kcal Logo" />
+    </div>
+
+    <div class="login-title">KPS Management System</div>
+    <div class="login-subtitle">Healthy Eat, Healthy Life</div>
+
+    <form id="loginForm">
+      <label>Email Address</label>
+      <input type="email" id="email" placeholder="Enter email" required />
+
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Enter password" required />
+
       <button type="submit">Login</button>
-  </form>
+    </form>
 
-  <!-- Correct way: module only loads app.js -->
-  <script type="module" src="./app.js"></script>
+    <div class="login-footer">
+      © 2025 <strong>Haroon Iqbal</strong> · Kcal Packaging
+    </div>
+</div>
 
-  <!-- Separate script for login logic -->
-  <script type="module">
-      import { login } from "./app.js";
+<!-- Load Firebase + App -->
+<script type="module" src="./app.js"></script>
 
-      document.getElementById("loginForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value;
+<!-- Login Handler -->
+<script type="module">
+import { login, protectPage } from "./app.js";
 
-        try {
-          await login(email, password);
-          // app.js handles redirect
-        } catch (error) {
-          alert(error.message);
-        }
-      });
-  </script>
+// If already logged in, redirect
+protectPage();
+
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = email.value.trim();
+  const password = password.value;
+
+  try { await login(email, password); }
+  catch (err) { alert(err.message); }
+});
+</script>
 
 </body>
 </html>
