@@ -1,3 +1,4 @@
+// ✅ Firebase Core
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
 import {
   getAuth,
@@ -31,7 +32,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// ✅ Login Function (FIXED)
+// ✅ Login
 export async function login(email, password) {
   return signInWithEmailAndPassword(auth, email, password);
 }
@@ -41,32 +42,59 @@ export function logout() {
   return signOut(auth);
 }
 
-// ✅ Get User Profile
+// ✅ Get employee profile from Firestore
 export async function getUserProfile(uid) {
-  const snap = await getDoc(doc(db, "users", uid));
+  const snap = await getDoc(doc(db, "employees", uid)); // ✅ FIXED collection name
   return snap.exists() ? snap.data() : null;
 }
 
-// ✅ Page security
+// ✅ Protect Page & redirect if not logged in
 export function protectPage(roles = []) {
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
-      if (!location.pathname.endsWith("login.html")) {
-        location.href = "login.html";
-      }
+      window.location.href = "login.html";
       return;
     }
-    
-    const profile = await getUserProfile(user.uid);
 
-    if (roles.length > 0 && profile && !roles.includes(profile.role)) {
-      alert("🚫 Access Denied");
-      location.href = "dashboard.html";
+    const profile = await getUserProfile(user.uid);
+    window.currentUser = profile; // ✅ store globally
+
+    if (!profile) {
+      alert("Profile not found in database ❌");
+      logout();
+      return;
+    }
+
+    // ✅ Role restrictions
+    if (roles.length && !roles.includes(profile.role)) {
+      alert("🚫 Unauthorized Access");
+      window.location.href = "dashboard.html";
     }
   });
 }
 
-// ✅ Save attendance
+// ✅ Load User Info To Header
+export function loadUserData() {
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+
+    const data = await getUserProfile(user.uid);
+
+    if (document.getElementById("userName")) {
+      document.getElementById("userName").textContent = data?.fullName || "User";
+    }
+
+    if (document.getElementById("userRole")) {
+      document.getElementById("userRole").textContent = data?.role || "---";
+    }
+
+    if (document.getElementById("userPhoto") && data?.photoURL) {
+      document.getElementById("userPhoto").src = data.photoURL;
+    }
+  });
+}
+
+// ✅ Save Attendance
 export async function saveAttendance(action) {
   const user = auth.currentUser;
   if (!user) throw new Error("Not signed in");
@@ -76,5 +104,4 @@ export async function saveAttendance(action) {
     action,
     timestamp: serverTimestamp()
   });
-  return true;
 }
