@@ -1,102 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Reports | KPS Management System</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    .report-filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-      align-items: center;
-    }
+<meta charset="UTF-8" />
+<title>Reports | KPS Management System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="style.css" />
 
-    .report-filters select,
-    .report-filters input {
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 0.9rem;
-    }
+<style>
+  .report-container {
+    background:#fff; padding:20px; border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    margin:auto; max-width:1200px;
+  }
 
-    .btn-export {
-      background: #006b3c;
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background 0.3s;
-    }
+  .report-filters {
+    display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px;
+  }
 
-    .btn-export:hover {
-      background: #009e58;
-    }
+  .report-filters input,.report-filters select {
+    padding:8px 10px;border:1px solid #ccc;border-radius:6px;
+  }
 
-    .report-section {
-      margin-top: 30px;
-    }
+  .btn {
+    background:#009e60;color:#fff;border:none;border-radius:6px;
+    padding:8px 14px;font-size:.9rem;font-weight:600;cursor:pointer;
+  }
+  .btn:hover { background:#00b874; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
+  table {
+    width:100%;border-collapse:collapse;margin-top:15px;
+  }
 
-    th, td {
-      border: 1px solid #e0e0e0;
-      padding: 8px 10px;
-      font-size: 0.9rem;
-      text-align: left;
-    }
+  th,td {
+    border:1px solid #e0e0e0;padding:8px 10px;font-size:.9rem;
+  }
 
-    th {
-      background: #f5f5f5;
-      color: #333;
-    }
-  </style>
+  th { background:#f3f3f3;color:#006b3c; }
+</style>
 </head>
+
 <body>
+<div id="header-container"></div>
 
-  <!-- HEADER -->
-  <div id="header-container"></div>
+<div class="app-shell">
 
-  <!-- PAGE WRAPPER -->
-  <div class="app-shell">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="nav-title">Main Menu</div>
-      <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
-      <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
-      <a href="employee_list.html" class="nav-link">📋 Employee List</a>
-      <a href="attendance.html" class="nav-link">🕒 Attendance</a>
-      <a href="overtime.html" class="nav-link">⏱ Overtime</a>
-      <a href="requests.html" class="nav-link">📩 Requests</a>
-      <a href="reports.html" class="nav-link active">📊 Reports</a>
-      <a href="meetings.html" class="nav-link">📅 Meetings</a>
-      <a href="notifications.html" class="nav-link">🔔 Notifications</a>
-      <a href="settings.html" class="nav-link">⚙ Settings</a>
-    </aside>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="nav-title">Main Menu</div>
+    <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+    <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
+    <a href="employee_list.html" class="nav-link">📋 Employee List</a>
+    <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+    <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+    <a href="requests.html" class="nav-link">📩 Requests</a>
+    <a href="reports.html" class="nav-link active">📊 Reports</a>
+    <a href="meetings.html" class="nav-link">📅 Meetings</a>
+    <a href="notifications.html" class="nav-link">🔔 Notifications</a>
+    <a href="settings.html" class="nav-link">⚙ Settings</a>
+  </aside>
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-      <h2>Reports</h2>
-      <p class="section-title">View summaries and export data</p>
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <h2>Reports</h2>
+    <p class="section-title">Generate & export attendance and overtime reports</p>
 
-      <!-- FILTER BAR -->
+    <div class="report-container">
+
+      <!-- Filter Bar -->
       <div class="report-filters">
         <select id="reportType">
-          <option value="attendance">Attendance</option>
-          <option value="overtime">Overtime</option>
-          <option value="requests">Requests</option>
+          <option value="attendance">Attendance Report</option>
+          <option value="overtime">Overtime Report</option>
         </select>
 
-        <input type="date" id="startDate" />
-        <input type="date" id="endDate" />
+        <input type="date" id="startDate"/>
+        <input type="date" id="endDate"/>
 
         <select id="sectionFilter">
           <option value="">All Sections</option>
@@ -107,118 +85,113 @@
           <option>FuelUP</option>
         </select>
 
-        <button id="generateReport" class="btn-export">📄 Generate Report</button>
-        <button id="exportReport" class="btn-export">⬇ Export PDF / Excel</button>
+        <button id="generateReport" class="btn">📄 Generate</button>
+        <button id="exportReport" class="btn">⬇ Export</button>
       </div>
 
-      <!-- REPORT TABLE -->
-      <div class="report-section">
-        <table>
-          <thead id="reportHeader">
-            <tr><th>Loading...</th></tr>
-          </thead>
-          <tbody id="reportBody">
-            <tr><td>Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </main>
-  </div>
+      <!-- Table -->
+      <table>
+        <thead id="reportHeader"><tr><th>Loading...</th></tr></thead>
+        <tbody id="reportBody"><tr><td>Waiting for report...</td></tr></tbody>
+      </table>
 
-  <!-- SCRIPT -->
-  <script type="module">
-    import { protectPage, attachLogout, loadUserData} from "./app.js";
-    import {
-      collection,
-      getDocs,
-      query,
-      where,
-    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+    </div>
+  </main>
+</div>
 
-    // Load Header
-    fetch("header.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("header-container").innerHTML = html;
-        const sidebar = document.querySelector(".sidebar");
-        const toggle = document.getElementById("menuToggle");
-        if (toggle && sidebar) toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
-        attachLogout();
-        loadUserData();
-      });
+<!-- SCRIPT -->
+<script type="module">
+import { protectPage, attachLogout, loadUserData, db } from "./app.js";
+import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-    // Role restriction (Manager, Supervisor, Admin)
-    protectPage({ roles: ["Admin", "Manager", "Supervisor"] });
+// Header
+fetch("header.html")
+.then(r=>r.text()).then(html=>{
+  document.getElementById("header-container").innerHTML=html;
+  attachLogout(); loadUserData();
+  const toggle=document.getElementById("menuToggle");
+  const sidebar=document.querySelector(".sidebar");
+  if(toggle&&sidebar) toggle.addEventListener("click",()=>sidebar.classList.toggle("active"));
+});
 
-    const reportType = document.getElementById("reportType");
-    const startDate = document.getElementById("startDate");
-    const endDate = document.getElementById("endDate");
-    const sectionFilter = document.getElementById("sectionFilter");
-    const reportBody = document.getElementById("reportBody");
-    const reportHeader = document.getElementById("reportHeader");
+// Protect
+protectPage({ roles:["Admin","Manager","Supervisor"] });
 
-    document.getElementById("generateReport").addEventListener("click", async () => {
-      const type = reportType.value;
-      reportBody.innerHTML = "<tr><td colspan='6'>Loading...</td></tr>";
-      let data = [];
+const reportType=document.getElementById("reportType");
+const startDate=document.getElementById("startDate");
+const endDate=document.getElementById("endDate");
+const sectionFilter=document.getElementById("sectionFilter");
+const reportBody=document.getElementById("reportBody");
+const reportHeader=document.getElementById("reportHeader");
 
-      if (type === "attendance") {
-        const col = collection(db, "attendance");
-        const snap = await getDocs(col);
-        data = snap.docs.map(d => d.data());
-        reportHeader.innerHTML = `
-          <tr><th>Date</th><th>Employee</th><th>Status</th><th>Check-In</th><th>Check-Out</th></tr>
-        `;
-        reportBody.innerHTML = data.map(d => `
-          <tr>
-            <td>${d.dateKey}</td>
-            <td>${d.userName}</td>
-            <td>${d.status}</td>
-            <td>${d.checkIn || "-"}</td>
-            <td>${d.checkOut || "-"}</td>
-          </tr>
-        `).join("");
-      }
+// Load Employees for Name Mapping
+let employeesMap={};
+(async()=>{
+  const empSnap = await getDocs(collection(db,"employees"));
+  empSnap.forEach(d=>employeesMap[d.id]=d.data().fullName);
+})();
 
-      if (type === "overtime") {
-        const col = collection(db, "overtime");
-        const snap = await getDocs(col);
-        data = snap.docs.map(d => d.data());
-        reportHeader.innerHTML = `
-          <tr><th>Date</th><th>Employee</th><th>Hours</th><th>Status</th></tr>
-        `;
-        reportBody.innerHTML = data.map(d => `
-          <tr>
-            <td>${d.date}</td>
-            <td>${d.empId}</td>
-            <td>${d.hours}</td>
-            <td>${d.status}</td>
-          </tr>
-        `).join("");
-      }
+document.getElementById("generateReport").addEventListener("click", async ()=>{
 
-      if (type === "requests") {
-        const col = collection(db, "requests");
-        const snap = await getDocs(col);
-        data = snap.docs.map(d => d.data());
-        reportHeader.innerHTML = `
-          <tr><th>Date</th><th>Employee</th><th>Type</th><th>Status</th></tr>
-        `;
-        reportBody.innerHTML = data.map(d => `
-          <tr>
-            <td>${d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleDateString() : "-"}</td>
-            <td>${d.userName}</td>
-            <td>${d.type}</td>
-            <td>${d.status}</td>
-          </tr>
-        `).join("");
-      }
-    });
+  const type = reportType.value;
+  const start = startDate.value;
+  const end = endDate.value;
+  const sectionVal = sectionFilter.value;
 
-    // Placeholder for export logic
-    document.getElementById("exportReport").addEventListener("click", () => {
-      alert("📄 Export feature (PDF/Excel) will be activated soon!");
-    });
-  </script>
+  reportBody.innerHTML = "<tr><td colspan='6'>Loading...</td></tr>";
+
+  let colName = type==="attendance" ? "attendance" : "overtime";
+  const colRef = collection(db,colName);
+
+  let qArr=[];
+  if(start) qArr.push(where("dateKey" in {} ? "dateKey" : "date",">=",start));
+  if(end) qArr.push(where("dateKey" in {} ? "dateKey" : "date","<=",end));
+  if(sectionVal) qArr.push(where("section","==",sectionVal));
+
+  const q = query(colRef, ...qArr);
+  const snap = await getDocs(q);
+
+  if(snap.empty){
+    reportBody.innerHTML="<tr><td colspan='6'>No records found.</td></tr>";
+    return;
+  }
+
+  if(type==="attendance"){
+    reportHeader.innerHTML = `
+      <tr><th>Date</th><th>Employee</th><th>Status</th><th>Check-In</th><th>Check-Out</th></tr>`;
+    reportBody.innerHTML = snap.docs.map(d=>{
+      const x=d.data();
+      return `
+      <tr>
+        <td>${x.dateKey}</td>
+        <td>${x.userName || employeesMap[x.uid] || "-"}</td>
+        <td>${x.status}</td>
+        <td>${x.checkIn||"-"}</td>
+        <td>${x.checkOut||"-"}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  if(type==="overtime"){
+    reportHeader.innerHTML = `
+      <tr><th>Date</th><th>Employee</th><th>Hours</th><th>Status</th></tr>`;
+    reportBody.innerHTML = snap.docs.map(d=>{
+      const x=d.data();
+      return `
+      <tr>
+        <td>${x.date}</td>
+        <td>${employeesMap[x.empId] || x.empId}</td>
+        <td>${x.hours}</td>
+        <td>${x.status}</td>
+      </tr>`;
+    }).join("");
+  }
+});
+
+// Export (future action)
+document.getElementById("exportReport").addEventListener("click",()=>{
+  alert("📦 Export to PDF & Excel coming next ✅");
+});
+</script>
 </body>
 </html>
