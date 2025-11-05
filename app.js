@@ -1,11 +1,11 @@
-// ✅ Firebase Core & Services
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+// ✅ Firebase Core
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut
-} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 import {
   getFirestore,
@@ -14,120 +14,144 @@ import {
   addDoc,
   collection,
   serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-// ✅ Firebase Config
-const firebaseConfig = {
-  apiKey: "AIzaSyB0fPDZpHEjxc7IMFd_f0_BrvTgqGJhySA",
-  authDomain: "kcal-packaging-workforce.firebaseapp.com",
-  projectId: "kcal-packaging-workforce",
-  storageBucket: "kcal-packaging-workforce.appspot.com",
-  messagingSenderId: "1025039246589",
-  appId: "1:1025039246589:web:ce37f12ec000bc03e4ca94",
-  measurementId: "G-7EN3V2W0QW"
-};
+import {
+  getStorage
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
-// ✅ Initialize Firebase
+import { firebaseConfig } from "./firebase-config.js";
+
+// ✅ Init Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
-// ✅ Login Function
+// ✅ Login
 export async function login(email, password) {
-  return signInWithEmailAndPassword(auth, password);
+  return signInWithEmailAndPassword(auth, email, password);
 }
 
-// ✅ Logout Function
-export async function logout() {
-  return signOut(auth);
+// ✅ Logout
+export function attachLogout() {
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => signOut(auth));
+  }
 }
 
-// ✅ Get User Role & Full Profile
-export async function getUserProfile(uid) {
-  const snap = await getDoc(doc(db, "users", uid));
+// ✅ Get Full Employee Data
+async function fetchUserData(uid) {
+  const ref = doc(db, "employees", uid);
+  const snap = await getDoc(ref);
   return snap.exists() ? snap.data() : null;
 }
 
-// ✅ Page Protection
-export function protectPage(requiredRoles = []) {
+// ✅ Load User UI Data
+export async function loadUserData() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const data = await fetchUserData(user.uid);
+  if (!data) return;
+
+  window.currentUser = data;
+
+  const nameEl = document.getElementById("userName");
+  const roleEl = document.getElementById("userRole");
+  const photoEl = document.getElementById("userPhoto");
+
+  if (nameEl) nameEl.textContent = data.fullName || "User";
+  if (roleEl) roleEl.textContent = data.role;
+  if (photoEl) photoEl.src = data.photoURL || "assets/default-user.png";
+
+  // Greeting
+  const hour = new Date().getHours();
+  let greeting = "Welcome";
+  if (hour < 12) greeting = "Good Morning 🌅";
+  else if (hour < 18) greeting = "Good Afternoon ☀️";
+  else greeting = "Good Evening 🌙";
+  
+  const greetBanner = document.getElementById("greetingMessage");
+  if (greetBanner) greetBanner.textContent = `${greeting}, ${data.fullName}`;
+}
+
+// ✅ Protect Pages by Login + Role
+export function protectPage(options = {}) {
+  const allowedRoles = options.roles || [];
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
-      if (!location.pathname.endsWith("login.html")) {
-        location.href = "./login.html";
+      if (!location.pathname.includes("login.html")) {
+        location.href = "login.html";
       }
       return;
     }
 
-    const profile = await getUserProfile(user.uid);
+    const data = await fetchUserData(user.uid);
+    if (!data) return;
 
-    if (requiredRoles.length > 0 && profile && !requiredRoles.includes(profile.role)) {
-      alert("You don't have access to this page");
-      location.href = "./index.html";
-    }
+    window.currentUser = data;
 
-    if (location.pathname.endsWith("login.html")) {
-      location.href = "./index.html";
+    // role lock
+    if (allowedRoles.length > 0 && !allowedRoles.includes(data.role)) {
+      alert("Access Denied ❌");
+      location.href = "dashboard.html";
     }
   });
 }
 
-// ✅ Attendance Save
+// ✅ Save Attendance
 export async function saveAttendance(action) {
   const user = auth.currentUser;
-  if (!user) throw new Error("Not signed in");
+  const data = window.currentUser;
+
+  if (!user || !data) throw new Error("Not logged in");
 
   await addDoc(collection(db, "attendance"), {
-    userId: user.uid,
+    uid: user.uid,
+    userName: data.fullName,
+    section: data.section,
+    shift: data.shift,
     action,
-    timestamp: serverTimestamp()
+    timestamp: serverTimestamp(),
+    dateKey: new Date().toISOString().split("T")[0]
   });
+
   return true;
 }
 
-// ✅ Access UI Elements (role + name display)
-export function attachUserInfo() {
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
-
-    const data = await getUserProfile(user.uid);
-
-    const nameEl = document.querySelector("[data-user-name]");
-    const roleEl = document.querySelector("[data-user-role]");
-    const sectionEl = document.querySelector("[data-user-section]");
-
-    if (nameEl) nameEl.textContent = data?.name || "";
-    if (roleEl) roleEl.textContent = data?.role || "";
-    if (sectionEl) sectionEl.textContent = data?.section || "";
-  });
-}
-
-// ✅ Handle Login Page form
+// ✅ Auto-actions for check in/out buttons
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
   if (form) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = form.email.value.trim();
-      const password = form.password.value;
+      const pass = form.password.value;
 
-      try { await login(email, password); } 
-      catch (err) { alert(err.message); }
+      try {
+        await login(email, pass);
+        location.href = "dashboard.html";
+      } catch (err) {
+        alert("Login failed ❌ " + err.message);
+      }
     });
   }
 
-  const logoutBtn = document.querySelector("[data-logout]");
-  if (logoutBtn) logoutBtn.onclick = logout;
+  const checkIn = document.getElementById("btnCheckIn");
+  const checkOut = document.getElementById("btnCheckOut");
 
-  const btnIn = document.getElementById("btnCheckIn");
-  const btnOut = document.getElementById("btnCheckOut");
+  if (checkIn)
+    checkIn.addEventListener("click", async () => {
+      await saveAttendance("IN");
+      alert("✅ Checked In");
+    });
 
-  if (btnIn) btnIn.onclick = async () => {
-    try { await saveAttendance("checkin"); alert("✅ Checked In"); }
-    catch (e) { alert(e.message); }
-  };
-
-  if (btnOut) btnOut.onclick = async () => {
-    try { await saveAttendance("checkout"); alert("✅ Checked Out"); }
-    catch (e) { alert(e.message); }
-  };
+  if (checkOut)
+    checkOut.addEventListener("click", async () => {
+      await saveAttendance("OUT");
+      alert("✅ Checked Out");
+    });
 });
