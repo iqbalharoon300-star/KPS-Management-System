@@ -11,7 +11,6 @@
   <!-- HEADER -->
   <div id="header-container"></div>
 
-  <!-- PAGE WRAPPER -->
   <div class="app-shell">
 
     <!-- SIDEBAR -->
@@ -32,12 +31,12 @@
 
     <!-- MAIN CONTENT -->
     <main class="main-content">
-      
+
       <section class="dashboard-top">
-        <div id="greetingMessage" class="greeting-banner">Welcome...</div>
+        <div id="greetingMessage" class="greeting-banner">Loading...</div>
       </section>
 
-      <!-- SUMMARY CARDS -->
+      <!-- CARDS -->
       <div class="card-row">
         <div class="kps-card">
           <h3>Total Employees</h3>
@@ -57,7 +56,7 @@
         </div>
       </div>
 
-      <!-- RECENT ACTIVITY -->
+      <!-- RECENT -->
       <div class="panel">
         <h3 class="section-title">Recent Attendance Activity</h3>
         <ul id="recentList" class="recent-list">
@@ -66,66 +65,70 @@
       </div>
 
     </main>
+
   </div>
 
-  <!-- LOAD HEADER + FIREBASE FUNCTIONS -->
+  <!-- SCRIPTS -->
   <script type="module">
-    import { protectPage, attachUserInfo, auth, db } from "./app.js";
-    import { collection, getDocs, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+    import { protectPage, loadUserData, db } from "./app.js";
+    import { 
+      collection, getDocs, query, orderBy, limit, where 
+    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-    // ✅ Protect page
+    // protect user
     protectPage();
 
-    // ✅ Load Header
+    // load header
     fetch("header.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("header-container").innerHTML = html;
-        attachUserInfo();
+      .then(r => r.text())
+      .then(h => {
+        document.getElementById("header-container").innerHTML = h;
+        loadUserData();
       });
 
-    // ✅ Greeting
-    auth.onAuthStateChanged(async user => {
-      if (!user) return;
-      const name = user.displayName || "KPS User";
-      document.getElementById("greetingMessage").textContent = `Welcome, ${name} 👋`;
-    });
+    // dashboard load after user ready
+    setTimeout(loadDashboard, 800);
 
-    // ✅ Fetch Stats
-    async function loadDashboardData() {
-
-      // Total Employees
+    async function loadDashboard() {
+      // total employees
       const empSnap = await getDocs(collection(db, "employees"));
       document.getElementById("employeeCount").textContent = empSnap.size;
 
-      // Present Today
+      // today's date
       const today = new Date().toISOString().split("T")[0];
-      const presentQuery = query(collection(db, "attendance"), where("date", "==", today));
-      const presentSnap = await getDocs(presentQuery);
+
+      // present count
+      const presentSnap = await getDocs(
+        query(collection(db, "attendance"), where("dateKey", "==", today))
+      );
       document.getElementById("presentCount").textContent = presentSnap.size;
 
-      // OT Count
+      // OT count
       const otSnap = await getDocs(collection(db, "overtime"));
       document.getElementById("otCount").textContent = otSnap.size;
 
-      // Requests pending
+      // requests
       const reqSnap = await getDocs(collection(db, "requests"));
       document.getElementById("reqCount").textContent = reqSnap.size;
 
-      // Recent Attendance
-      const recentQuery = query(collection(db, "attendance"), orderBy("timestamp", "desc"), limit(5));
-      const recSnap = await getDocs(recentQuery);
+      // recent log
+      const recQuery = query(
+        collection(db, "attendance"),
+        orderBy("timestamp", "desc"),
+        limit(6)
+      );
+
+      const recSnap = await getDocs(recQuery);
       const list = document.getElementById("recentList");
       list.innerHTML = "";
-      recSnap.forEach(doc => {
-        const d = doc.data();
+
+      recSnap.forEach(d => {
+        const x = d.data();
         const li = document.createElement("li");
-        li.textContent = `${d.userId} — ${d.action}`;
+        li.textContent = `${x.userName} — ${x.action}`;
         list.appendChild(li);
       });
     }
-
-    loadDashboardData();
   </script>
 
 </body>
