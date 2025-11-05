@@ -5,20 +5,15 @@
   <title>My Profile | KPS Management System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
-  <style>
-    main.content {
-      background: #f9fafb;
-      padding: 25px;
-      border-radius: 12px;
-    }
 
-    .profile-card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 30px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  <style>
+    .profile-container {
       max-width: 700px;
       margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
       text-align: center;
     }
 
@@ -26,73 +21,69 @@
       width: 130px;
       height: 130px;
       border-radius: 50%;
-      object-fit: cover;
       border: 3px solid #009e60;
+      object-fit: cover;
     }
 
     .profile-name {
       font-size: 22px;
       font-weight: 700;
-      color: #009e60;
       margin-top: 10px;
+      color: #006b3c;
     }
 
-    .profile-role {
-      font-size: 15px;
-      color: #555;
-    }
-
+    .profile-role,
     .profile-section {
       font-size: 14px;
-      color: #777;
+      color: #666;
     }
 
-    form.profile-form {
+    .profile-form {
+      margin-top: 20px;
       text-align: left;
-      margin-top: 25px;
     }
 
-    form.profile-form label {
+    .profile-form label {
       font-weight: 600;
-      color: #333;
-      display: block;
       margin-top: 10px;
+      display: block;
     }
 
-    form.profile-form input {
+    .profile-form input {
       width: 100%;
       padding: 10px;
+      margin-top: 5px;
       border-radius: 8px;
       border: 1px solid #ccc;
-      margin-top: 5px;
-      font-size: 14px;
     }
 
-    .btn {
+    .btn-update {
       background: #009e60;
-      color: #fff;
+      color: white;
       border: none;
-      border-radius: 8px;
       padding: 10px 20px;
+      border-radius: 6px;
       cursor: pointer;
-      margin-top: 20px;
       font-weight: 600;
+      margin-top: 15px;
     }
 
-    .btn:hover { background: #00b874; }
+    .btn-update:hover {
+      background: #00b96b;
+    }
 
     .toast {
       position: fixed;
-      bottom: 20px;
       right: 20px;
+      bottom: 20px;
       background: #009e60;
       color: white;
-      padding: 12px 20px;
+      padding: 12px 18px;
       border-radius: 8px;
-      font-weight: 600;
       opacity: 0;
-      transition: opacity 0.5s, transform 0.5s;
       transform: translateY(20px);
+      transition: .4s;
+      font-weight: bold;
       z-index: 999;
     }
 
@@ -102,126 +93,122 @@
     }
   </style>
 </head>
-<body>
-  <div id="header-placeholder"></div>
 
+<body>
+
+<!-- Header -->
+<div id="header-container"></div>
+
+<div class="app-shell">
+  
+  <!-- Sidebar -->
   <aside class="sidebar">
-    <div class="sidebar-header">
-      <img src="assets/logo.png" class="logo" alt="Kcal Logo" />
-      <h2>KPS System</h2>
-      <p class="slogan">Healthy Eat, Healthy Life</p>
-    </div>
-    <h3 class="sidebar-title">Navigation</h3>
-    <ul>
-      <li><a href="dashboard.html">🏠 Dashboard</a></li>
-      <li><a href="attendance.html">🕒 Attendance</a></li>
-      <li><a href="overtime.html">⏱ Overtime</a></li>
-      <li><a href="requests.html">📨 Requests</a></li>
-      <li><a href="notifications.html">🔔 Notifications</a></li>
-      <li class="active"><a href="employee_profile.html">👤 My Profile</a></li>
-    </ul>
+    <div class="nav-title">Main Menu</div>
+    <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+    <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+    <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+    <a href="requests.html" class="nav-link">📩 Requests</a>
+    <a href="notifications.html" class="nav-link">🔔 Notifications</a>
+    <a href="employee_profile.html" class="nav-link active">👤 My Profile</a>
   </aside>
 
-  <main class="content">
-    <div class="profile-card">
-      <img id="profilePhoto" src="assets/default-user.png" class="profile-photo" alt="Profile Photo" />
-      <div class="profile-name" id="profileName">Loading...</div>
-      <div class="profile-role" id="profileRole"></div>
-      <div class="profile-section" id="profileSection"></div>
+  <!-- Main -->
+  <main class="main-content">
+    <h2>My Profile</h2>
+    <p class="section-title">View & update your personal information</p>
 
-      <form class="profile-form" id="profileForm">
+    <div class="profile-container">
+      <img id="profilePhoto" src="assets/default-user.png" class="profile-photo" />
+      <div class="profile-name" id="profileName">Loading...</div>
+      <div id="profileRole" class="profile-role"></div>
+      <div id="profileSection" class="profile-section"></div>
+
+      <form id="profileForm" class="profile-form">
         <label>Email</label>
-        <input type="email" id="email" />
+        <input id="email" type="email" />
 
         <label>Phone</label>
-        <input type="text" id="phone" />
+        <input id="phone" type="text" />
 
-        <label>Profile Picture (optional)</label>
-        <input type="file" id="photo" accept="image/*" />
+        <label>Profile Photo</label>
+        <input id="photoUpload" type="file" accept="image/*" />
 
-        <button type="submit" class="btn">💾 Update Profile</button>
+        <button class="btn-update" type="submit">💾 Save Changes</button>
       </form>
     </div>
   </main>
+</div>
 
-  <div id="toast" class="toast"></div>
+<div id="toast" class="toast"></div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-    import { firebaseConfig } from "./scripts/firebase-config.js";
-    import { protectPage, attachLogout } from "./app.js";
+<script type="module">
+  import { auth, db, storage, protectPage, attachLogout, loadUserData } from "./app.js";
+  import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+  import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-    const auth = getAuth(app);
+  // Load header
+  fetch("header.html")
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById("header-container").innerHTML = html;
+      const toggle = document.getElementById("menuToggle");
+      const sidebar = document.querySelector(".sidebar");
+      if (toggle && sidebar) toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
+      attachLogout();
+      loadUserData();
+    });
 
-    fetch("header.html")
-      .then(r => r.text())
-      .then(d => {
-        document.getElementById("header-placeholder").innerHTML = d;
-        document.getElementById("goToDashboard")?.addEventListener("click", () => window.location.href = "dashboard.html");
-        attachLogout();
-      });
+  protectPage(); // All logged employees
 
-    protectPage();
+  const toast = document.getElementById("toast");
 
-    const toast = document.getElementById("toast");
-    const profilePhoto = document.getElementById("profilePhoto");
-    const profileName = document.getElementById("profileName");
-    const profileRole = document.getElementById("profileRole");
-    const profileSection = document.getElementById("profileSection");
-    const form = document.getElementById("profileForm");
+  function showToast(msg, ok = true) {
+    toast.textContent = msg;
+    toast.style.background = ok ? "#009e60" : "#d32f2f";
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2500);
+  }
 
-    function showToast(msg, success = true) {
-      toast.textContent = msg;
-      toast.style.background = success ? "#009e60" : "#e53935";
-      toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 3000);
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) return;
+    
+    const empRef = doc(db, "employees", user.uid);
+    const snap = await getDoc(empRef);
+
+    if (!snap.exists()) {
+      showToast("Profile not found!", false);
+      return;
     }
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-      const ref = doc(db, "employees", user.uid);
-      const snap = await getDoc(ref);
-      if (snap.exists()) {
-        const data = snap.data();
-        profileName.textContent = data.fullName || `${data.firstName || ""} ${data.lastName || ""}`;
-        profileRole.textContent = data.role;
-        profileSection.textContent = `${data.section} – ${data.shift}`;
-        document.getElementById("email").value = data.email || "";
-        document.getElementById("phone").value = data.phone || "";
-        if (data.photoURL) profilePhoto.src = data.photoURL;
-      } else {
-        showToast("Profile not found", false);
-      }
-    });
+    const e = snap.data();
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const user = auth.currentUser;
-      if (!user) return;
+    profileName.textContent = e.fullName;
+    profileRole.textContent = e.role;
+    profileSection.textContent = `${e.section} - ${e.shift}`;
+    email.value = e.email || "";
+    phone.value = e.phone || "";
+    if (e.photoURL) profilePhoto.src = e.photoURL;
 
-      const ref = doc(db, "employees", user.uid);
-      const updateData = {
-        email: document.getElementById("email").value,
-        phone: document.getElementById("phone").value,
+    profileForm.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+
+      let updateData = {
+        email: email.value,
+        phone: phone.value
       };
 
-      const file = document.getElementById("photo").files[0];
+      const file = photoUpload.files[0];
       if (file) {
-        const sref = ref(storage, "employee_photos/" + Date.now() + "_" + file.name);
-        await uploadBytes(sref, file);
-        const photoURL = await getDownloadURL(sref);
-        updateData.photoURL = photoURL;
+        const fileRef = ref(storage, `employee_photos/${user.uid}_${file.name}`);
+        await uploadBytes(fileRef, file);
+        updateData.photoURL = await getDownloadURL(fileRef);
       }
 
-      await updateDoc(ref, updateData);
-      showToast("✅ Profile updated successfully");
+      await updateDoc(empRef, updateData);
+      showToast("✅ Profile Updated");
     });
-  </script>
+  });
+</script>
+
 </body>
 </html>
