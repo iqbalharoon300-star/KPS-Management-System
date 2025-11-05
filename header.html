@@ -1,9 +1,11 @@
 <header class="kps-header">
+
+  <!-- Left Side -->
   <div class="header-left">
     <button id="menuToggle" class="menu-btn">☰</button>
 
     <a href="dashboard.html" class="logo-link">
-      <img src="assets/logo.png" alt="Kcal Logo" class="header-logo" />
+      <img src="assets/logo.png" class="header-logo" alt="Kcal">
       <div class="logo-text">
         <h1>KPS Management System</h1>
         <p class="slogan">Healthy Eat, Healthy Life</p>
@@ -11,27 +13,40 @@
     </a>
   </div>
 
+  <!-- Right Side -->
   <div class="header-right">
-    <div class="user-info">
-      <img id="userPhoto" src="assets/default-user.png" alt="User" class="user-avatar">
+
+    <!-- Profile Click -->
+    <div class="user-wrapper" id="profileMenuToggle">
+      <img id="userPhoto" src="assets/default-user.png" class="user-avatar">
+
       <div>
         <span id="userName" class="user-name">Loading...</span><br>
         <span id="userRole" class="user-role">...</span>
       </div>
+
+      <span class="arrow">▼</span>
     </div>
 
-    <button class="logout-btn" data-logout>Logout</button>
+    <!-- Dropdown -->
+    <div class="profile-menu" id="profileMenu">
+      <a href="profile.html">👤 My Profile</a>
+      <a href="settings.html">⚙ Settings</a>
+      <a href="#" id="logoutBtn">🚪 Logout</a>
+    </div>
+
   </div>
+
 </header>
 
 <script type="module">
   import { auth, logout, getUserProfile } from "./app.js";
 
-  // ✅ Load user info from Firebase
+  // Load user info
   auth.onAuthStateChanged(async (user) => {
     if (!user) return;
-
     const data = await getUserProfile(user.uid);
+
     document.getElementById("userName").textContent = data?.name || "User";
     document.getElementById("userRole").textContent = data?.role || "---";
 
@@ -40,61 +55,103 @@
     }
   });
 
-  // ✅ Logout
-  document.querySelector("[data-logout]").addEventListener("click", logout);
+  // Logout
+  document.getElementById("logoutBtn").addEventListener("click", logout);
 
-  // ✅ Works on mobile to toggle sidebar
+  // Sidebar toggle
   const sidebar = document.querySelector(".sidebar");
-  const toggle = document.getElementById("menuToggle");
-  if (toggle && sidebar) {
-    toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
-  }
+  document.getElementById("menuToggle").addEventListener("click", () => {
+    sidebar.classList.toggle("active");
+  });
+
+  // Profile dropdown toggle
+  const profileToggle = document.getElementById("profileMenuToggle");
+  const profileMenu = document.getElementById("profileMenu");
+
+  profileToggle.addEventListener("click", () => {
+    profileMenu.classList.toggle("show");
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!profileToggle.contains(e.target) && !profileMenu.contains(e.target)) {
+      profileMenu.classList.remove("show");
+    }
+  });
 </script>
 
 <style>
-/* ✅ same CSS as before — unchanged */
 .kps-header {
-  background: #006b3c;
-  color: #fff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 18px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  flex-wrap: wrap;
-}
-.header-left { display: flex; align-items: center; gap: 10px; }
-
-.menu-btn {
-  background: transparent; border: none; font-size: 1.6rem;
-  color: #fff; cursor: pointer; display: none;
+  background:#006b3c;
+  color:#fff;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 18px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
 }
 
-.logo-link { display: flex; align-items: center; text-decoration: none; color: #fff; }
-.header-logo { height: 40px; width: 40px; margin-right: 10px; }
+.header-left { display:flex; align-items:center; gap:10px; }
+.menu-btn { background:none;border:none;font-size:1.6rem;color:#fff;cursor:pointer;display:none; }
 
-.logo-text h1 { font-size: 1.1rem; font-weight: 600; margin: 0; }
-.logo-text .slogan { font-size: 0.8rem; margin: 0; opacity: 0.85; }
+.logo-link { display:flex; align-items:center; text-decoration:none; color:#fff; }
+.header-logo { height:40px; width:40px; }
 
-.header-right { display: flex; align-items: center; gap: 20px; }
+.logo-text h1 { font-size:1.1rem; margin:0; font-weight:600; }
+.logo-text p { font-size:0.75rem; margin:0; opacity:0.85; }
 
-.user-info { display: flex; align-items: center; gap: 10px; }
+.header-right { display:flex; align-items:center; gap:15px; position:relative; }
+
+.user-wrapper {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  padding:4px 8px;
+  border-radius:6px;
+}
+
+.user-wrapper:hover { background:rgba(255,255,255,0.15); }
+
 .user-avatar {
-  width: 38px; height: 38px; border-radius: 50%; border: 2px solid #fff;
-  object-fit: cover;
+  width:38px; height:38px; border-radius:50%;
+  border:2px solid #fff; object-fit:cover;
 }
-.user-name { font-weight: 600; font-size: 0.95rem; }
-.user-role { font-size: 0.8rem; color: #e0e0e0; }
 
-.logout-btn {
-  background: #fff; color: #006b3c; border: none; border-radius: 6px;
-  padding: 6px 12px; cursor: pointer; font-weight: 600;
-  transition: background 0.25s;
+.user-name { font-weight:600; font-size:0.95rem; }
+.user-role { font-size:0.75rem; color:#eee; }
+
+.profile-menu {
+  position:absolute;
+  top:55px; right:0;
+  background:#fff;
+  color:#222;
+  width:170px;
+  border-radius:8px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.15);
+  display:none;
+  flex-direction:column;
+  z-index:1000;
 }
-.logout-btn:hover { background: #e5e5e5; }
+
+.profile-menu.show { display:flex; }
+
+.profile-menu a {
+  padding:10px 14px;
+  text-decoration:none;
+  color:#222;
+  font-size:0.9rem;
+  border-bottom:1px solid #eee;
+  cursor:pointer;
+}
+
+.profile-menu a:hover {
+  background:#f4f4f4;
+}
+
+.arrow { font-size:0.7rem; }
 
 @media(max-width:768px){
-  .menu-btn { display: block; }
-  .header-right { width: 100%; justify-content: space-between; margin-top: 8px; }
+  .menu-btn { display:block; }
 }
 </style>
