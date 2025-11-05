@@ -22,6 +22,7 @@
       <a href="employee_list.html" class="nav-link">📋 Employee List</a>
       <a href="attendance.html" class="nav-link">🕒 Attendance</a>
       <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+      <a href="deductions.html" class="nav-link">💸 Deductions</a>
       <a href="requests.html" class="nav-link">📩 Requests</a>
       <a href="reports.html" class="nav-link">📊 Reports</a>
       <a href="meetings.html" class="nav-link">📅 Meetings</a>
@@ -31,27 +32,28 @@
 
     <!-- MAIN CONTENT -->
     <main class="main-content">
+      
       <section class="dashboard-top">
-        <div id="greetingMessage" class="greeting-banner"></div>
+        <div id="greetingMessage" class="greeting-banner">Welcome...</div>
       </section>
 
       <!-- SUMMARY CARDS -->
       <div class="card-row">
         <div class="kps-card">
           <h3>Total Employees</h3>
-          <div class="kps-value" id="employeeCount">0</div>
+          <div class="kps-value" id="employeeCount">--</div>
         </div>
         <div class="kps-card">
           <h3>Present Today</h3>
-          <div class="kps-value" id="presentCount">0</div>
+          <div class="kps-value" id="presentCount">--</div>
         </div>
         <div class="kps-card">
           <h3>Overtime Today</h3>
-          <div class="kps-value" id="otCount">0</div>
+          <div class="kps-value" id="otCount">--</div>
         </div>
         <div class="kps-card">
           <h3>Pending Requests</h3>
-          <div class="kps-value" id="reqCount">0</div>
+          <div class="kps-value" id="reqCount">--</div>
         </div>
       </div>
 
@@ -59,38 +61,71 @@
       <div class="panel">
         <h3 class="section-title">Recent Attendance Activity</h3>
         <ul id="recentList" class="recent-list">
-          <li>Loading recent records...</li>
+          <li>Loading...</li>
         </ul>
       </div>
+
     </main>
   </div>
 
-  <!-- LOAD HEADER, LOGOUT & PROTECT PAGE -->
+  <!-- LOAD HEADER + FIREBASE FUNCTIONS -->
   <script type="module">
-    import { protectPage, attachLogout, loadUserData } from "./app.js";
+    import { protectPage, attachUserInfo, auth, db } from "./app.js";
+    import { collection, getDocs, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-    // load header
+    // ✅ Protect page
+    protectPage();
+
+    // ✅ Load Header
     fetch("header.html")
       .then(res => res.text())
       .then(html => {
         document.getElementById("header-container").innerHTML = html;
-
-        // Sidebar toggle (for mobile)
-        const sidebar = document.querySelector(".sidebar");
-        const toggle = document.getElementById("menuToggle");
-        if (toggle && sidebar) {
-          toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
-        }
-
-        // Attach logout functionality
-        attachLogout();
-
-        // Load user info (name, role, photo, greeting)
-        loadUserData();
+        attachUserInfo();
       });
 
-    // Protect page (redirect if not logged in)
-    protectPage();
+    // ✅ Greeting
+    auth.onAuthStateChanged(async user => {
+      if (!user) return;
+      const name = user.displayName || "KPS User";
+      document.getElementById("greetingMessage").textContent = `Welcome, ${name} 👋`;
+    });
+
+    // ✅ Fetch Stats
+    async function loadDashboardData() {
+
+      // Total Employees
+      const empSnap = await getDocs(collection(db, "employees"));
+      document.getElementById("employeeCount").textContent = empSnap.size;
+
+      // Present Today
+      const today = new Date().toISOString().split("T")[0];
+      const presentQuery = query(collection(db, "attendance"), where("date", "==", today));
+      const presentSnap = await getDocs(presentQuery);
+      document.getElementById("presentCount").textContent = presentSnap.size;
+
+      // OT Count
+      const otSnap = await getDocs(collection(db, "overtime"));
+      document.getElementById("otCount").textContent = otSnap.size;
+
+      // Requests pending
+      const reqSnap = await getDocs(collection(db, "requests"));
+      document.getElementById("reqCount").textContent = reqSnap.size;
+
+      // Recent Attendance
+      const recentQuery = query(collection(db, "attendance"), orderBy("timestamp", "desc"), limit(5));
+      const recSnap = await getDocs(recentQuery);
+      const list = document.getElementById("recentList");
+      list.innerHTML = "";
+      recSnap.forEach(doc => {
+        const d = doc.data();
+        const li = document.createElement("li");
+        li.textContent = `${d.userId} — ${d.action}`;
+        list.appendChild(li);
+      });
+    }
+
+    loadDashboardData();
   </script>
 
 </body>
