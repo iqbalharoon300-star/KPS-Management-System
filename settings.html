@@ -7,201 +7,162 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     .settings-card {
-      background: #fff;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      max-width: 800px;
-      margin: 0 auto 30px;
+      background:#fff;padding:25px;border-radius:12px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.08);
+      max-width:800px;margin:0 auto 30px;
     }
-
-    .settings-card h3 {
-      color: #006b3c;
-      margin-bottom: 15px;
+    .settings-card h3 {color:#009e60;margin-bottom:15px;font-weight:700;}
+    .settings-form {display:flex;flex-direction:column;gap:15px;}
+    .settings-form label {font-weight:600;color:#009e60;}
+    .settings-form input,.settings-form select {
+      padding:8px 10px;border:1px solid #ccc;border-radius:6px;font-size:.9rem;
     }
-
-    .settings-form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .settings-form label {
-      font-weight: 600;
-      color: #006b3c;
-    }
-
-    .settings-form input,
-    .settings-form select {
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 0.9rem;
-    }
-
     .settings-form button {
-      background: #006b3c;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 10px 20px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s;
-      align-self: flex-start;
+      background:#009e60;color:#fff;border:none;border-radius:6px;
+      padding:10px 20px;font-weight:600;cursor:pointer;transition:.3s;
     }
-
-    .settings-form button:hover {
-      background: #009e58;
+    .settings-form button:hover {background:#00b874;}
+    .settings-divider {height:1px;background:#e0e0e0;margin:10px 0;}
+    
+    .toast {
+      position:fixed;bottom:20px;right:20px;
+      background:#009e60;color:#fff;padding:12px 20px;border-radius:8px;
+      font-weight:600;opacity:0;transition:.5s;transform:translateY(20px);
+      z-index:999;
     }
-
-    .settings-note {
-      font-size: 0.9rem;
-      color: #555;
-      margin-top: 10px;
-    }
-
-    .settings-divider {
-      height: 1px;
-      background: #e0e0e0;
-      margin: 20px 0;
-    }
+    .toast.show {opacity:1;transform:translateY(0);}
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
-  <div id="header-container"></div>
+<div id="header-container"></div>
 
-  <!-- PAGE WRAPPER -->
-  <div class="app-shell">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="nav-title">Main Menu</div>
-      <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
-      <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
-      <a href="employee_list.html" class="nav-link">📋 Employee List</a>
-      <a href="attendance.html" class="nav-link">🕒 Attendance</a>
-      <a href="overtime.html" class="nav-link">⏱ Overtime</a>
-      <a href="requests.html" class="nav-link">📩 Requests</a>
-      <a href="reports.html" class="nav-link">📊 Reports</a>
-      <a href="meetings.html" class="nav-link">📅 Meetings</a>
-      <a href="notifications.html" class="nav-link">🔔 Notifications</a>
-      <a href="settings.html" class="nav-link active">⚙ Settings</a>
-    </aside>
+<div class="app-shell">
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-      <h2>System Settings</h2>
-      <p class="section-title">Manage KPS configurations and department preferences</p>
+  <aside class="sidebar">
+    <div class="nav-title">Main Menu</div>
+    <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+    <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
+    <a href="employee_list.html" class="nav-link">📋 Employee List</a>
+    <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+    <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+    <a href="requests.html" class="nav-link">📩 Requests</a>
+    <a href="reports.html" class="nav-link">📊 Reports</a>
+    <a href="meetings.html" class="nav-link">📅 Meetings</a>
+    <a href="notifications.html" class="nav-link">🔔 Notifications</a>
+    <a href="settings.html" class="nav-link active">⚙ Settings</a>
+  </aside>
 
-      <div class="settings-card">
-        <h3>Attendance & Overtime Setup</h3>
-        <form id="settingsForm" class="settings-form">
-          <label for="attendanceCutoff">Daily Working Hours (before Overtime)</label>
-          <input type="number" id="attendanceCutoff" min="1" max="24" placeholder="10" />
+  <main class="main-content">
+    <h2>System Settings</h2>
+    <p class="section-title">Department attendance & overtime configuration</p>
 
-          <label for="attendanceCycle">Attendance Cycle (Start → End)</label>
-          <input type="text" id="attendanceCycle" placeholder="21st → 20th" />
+    <div class="settings-card">
+      <h3>Attendance & Overtime Setup</h3>
+      <form id="settingsForm" class="settings-form">
+        
+        <label>Daily Working Hours (before OT)</label>
+        <input type="number" id="attendanceCutoff" placeholder="10" min="1" max="24"/>
 
-          <label for="overtimeCycle">Overtime Cycle (Start → End)</label>
-          <input type="text" id="overtimeCycle" placeholder="16th → 15th" />
+        <label>Attendance Cycle</label>
+        <input type="text" id="attendanceCycle" placeholder="21st → 20th"/>
 
-          <label for="publicHoliday">Public Holiday Policy</label>
-          <select id="publicHoliday">
-            <option value="paid">Paid</option>
-            <option value="unpaid">Unpaid</option>
-          </select>
+        <label>Overtime Cycle</label>
+        <input type="text" id="overtimeCycle" placeholder="16th → 15th"/>
 
-          <div class="settings-divider"></div>
+        <label>Public Holiday Policy</label>
+        <select id="publicHoliday">
+          <option value="paid">Paid</option>
+          <option value="unpaid">Unpaid</option>
+        </select>
 
-          <label for="defaultShift">Default Shift</label>
-          <select id="defaultShift">
-            <option value="Day">Day</option>
-            <option value="Night">Night</option>
-            <option value="Both">Both</option>
-          </select>
+        <div class="settings-divider"></div>
 
-          <label for="departmentName">Department Name</label>
-          <input type="text" id="departmentName" placeholder="Kcal Packaging Department" />
+        <label>Default Shift</label>
+        <select id="defaultShift">
+          <option>Day</option><option>Night</option><option>Both</option>
+        </select>
 
-          <button type="submit">💾 Save Settings</button>
-          <p id="settingsMsg" style="margin-top:10px; font-weight:600;"></p>
-        </form>
+        <label>Department Name</label>
+        <input type="text" id="departmentName" placeholder="Kcal Packaging Department"/>
 
-        <p class="settings-note">
-          ⚙ These settings affect attendance and overtime calculations globally across the KPS Management System.
-        </p>
-      </div>
-    </main>
-  </div>
+        <button type="submit">💾 Save Settings</button>
+        <p id="settingsMsg"></p>
+      </form>
+    </div>
+  </main>
 
-  <!-- SCRIPT -->
-  <script type="module">
-    import { protectPage, attachLogout, loadUserData} from "./app.js";
-    import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+</div>
 
-    // Load Header
-    fetch("header.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("header-container").innerHTML = html;
-        const sidebar = document.querySelector(".sidebar");
-        const toggle = document.getElementById("menuToggle");
-        if (toggle && sidebar) toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
-        attachLogout();
-        loadUserData();
-      });
+<div id="toast" class="toast"></div>
 
-    // Restrict access only to Admin, Manager, Supervisor
-    protectPage({ roles: ["Admin", "Manager", "Supervisor"] });
+<script type="module">
+import { protectPage, attachLogout, loadUserData, db } from "./app.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-    const form = document.getElementById("settingsForm");
-    const msg = document.getElementById("settingsMsg");
-    const settingsRef = doc(db, "system", "settings");
+// Load header
+fetch("header.html").then(res=>res.text()).then(html=>{
+  document.getElementById("header-container").innerHTML=html;
+  loadUserData(); attachLogout();
+  const toggle=document.getElementById("menuToggle");
+  const sidebar=document.querySelector(".sidebar");
+  if(toggle && sidebar) toggle.addEventListener("click",()=>sidebar.classList.toggle("active"));
+});
 
-    // Load existing settings
-    async function loadSettings() {
-      const snap = await getDoc(settingsRef);
-      if (snap.exists()) {
-        const s = snap.data();
-        document.getElementById("attendanceCutoff").value = s.attendanceCutoff || 10;
-        document.getElementById("attendanceCycle").value = s.attendanceCycle || "21st → 20th";
-        document.getElementById("overtimeCycle").value = s.overtimeCycle || "16th → 15th";
-        document.getElementById("publicHoliday").value = s.publicHoliday || "paid";
-        document.getElementById("defaultShift").value = s.defaultShift || "Day";
-        document.getElementById("departmentName").value = s.departmentName || "Kcal Packaging Department";
-      }
-    }
+// Restrict access
+protectPage({ roles:["Admin","Manager","Supervisor"] });
 
-    // Save settings
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      msg.textContent = "Saving...";
-      msg.style.color = "#555";
+const settingsRef = doc(db,"system","settings");
+const form=document.getElementById("settingsForm");
+const msg=document.getElementById("settingsMsg");
+const toast=document.getElementById("toast");
 
-      const data = {
-        attendanceCutoff: parseInt(document.getElementById("attendanceCutoff").value) || 10,
-        attendanceCycle: document.getElementById("attendanceCycle").value,
-        overtimeCycle: document.getElementById("overtimeCycle").value,
-        publicHoliday: document.getElementById("publicHoliday").value,
-        defaultShift: document.getElementById("defaultShift").value,
-        departmentName: document.getElementById("departmentName").value,
-        updatedAt: new Date().toISOString(),
-      };
+function showToast(t,s=true){
+  toast.textContent=t;
+  toast.style.background=s?"#009e60":"#e53935";
+  toast.classList.add("show");
+  setTimeout(()=>toast.classList.remove("show"),2500);
+}
 
-      try {
-        await setDoc(settingsRef, data);
-        msg.textContent = "✅ Settings saved successfully!";
-        msg.style.color = "green";
-      } catch (err) {
-        console.error(err);
-        msg.textContent = "❌ " + err.message;
-        msg.style.color = "red";
-      }
-    });
+async function loadSettings(){
+  const snap=await getDoc(settingsRef);
+  if(snap.exists()){
+    const s=snap.data();
+    attendanceCutoff.value=s.attendanceCutoff||10;
+    attendanceCycle.value=s.attendanceCycle||"21st → 20th";
+    overtimeCycle.value=s.overtimeCycle||"16th → 15th";
+    publicHoliday.value=s.publicHoliday||"paid";
+    defaultShift.value=s.defaultShift||"Day";
+    departmentName.value=s.departmentName||"Kcal Packaging Department";
+  }
+}
 
-    loadSettings();
-  </script>
+form.addEventListener("submit",async e=>{
+  e.preventDefault();
+  msg.textContent="Saving..."; msg.style.color="#444";
+
+  const data={
+    attendanceCutoff: parseInt(attendanceCutoff.value)||10,
+    attendanceCycle: attendanceCycle.value,
+    overtimeCycle: overtimeCycle.value,
+    publicHoliday: publicHoliday.value,
+    defaultShift: defaultShift.value,
+    departmentName: departmentName.value,
+    updatedAt:new Date().toISOString()
+  };
+
+  try{
+    await setDoc(settingsRef,data);
+    msg.textContent="✅ Saved Successfully"; msg.style.color="green";
+    showToast("Settings updated");
+  }catch(err){
+    msg.textContent="❌ "+err.message; msg.style.color="red";
+    showToast("Error saving",false);
+  }
+});
+
+loadSettings();
+</script>
+
 </body>
 </html>
