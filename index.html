@@ -129,7 +129,12 @@
 
   <!-- Firebase & app.js -->
 <!-- Load your app code as a module -->
-<script type="module" src="./app.js"></script>
+<script type="module" src="./app.js">
+  import { protectPage } from "./app.js";
+  // Example: allow all signed-in users. For role-restricted:
+  // protectPage(["admin","manager","supervisor"]);
+  protectPage(); 
+</script>
 
 </body>
 </html>
