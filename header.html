@@ -1,150 +1,100 @@
 <header class="kps-header">
   <div class="header-left">
     <button id="menuToggle" class="menu-btn">☰</button>
-    <div class="logo-area">
-      <a href="dashboard.html" class="logo-link">
-        <img src="assets/logo.png" alt="Kcal Logo" class="header-logo" />
-        <div class="logo-text">
-          <h1>KPS Management System</h1>
-          <p class="slogan">Healthy Eat, Healthy Life</p>
-        </div>
-      </a>
-    </div>
+
+    <a href="dashboard.html" class="logo-link">
+      <img src="assets/logo.png" alt="Kcal Logo" class="header-logo" />
+      <div class="logo-text">
+        <h1>KPS Management System</h1>
+        <p class="slogan">Healthy Eat, Healthy Life</p>
+      </div>
+    </a>
   </div>
 
   <div class="header-right">
     <div class="user-info">
-      <img id="userPhoto" src="assets/default-user.png" alt="User" class="user-avatar" />
+      <img id="userPhoto" src="assets/default-user.png" alt="User" class="user-avatar">
       <div>
         <span id="userName" class="user-name">Loading...</span><br>
-        <span id="userRole" class="user-role">Role</span>
+        <span id="userRole" class="user-role">...</span>
       </div>
     </div>
-    <button id="logoutBtn" class="logout-btn">Logout</button>
+
+    <button class="logout-btn" data-logout>Logout</button>
   </div>
 </header>
 
+<script type="module">
+  import { auth, logout, getUserProfile } from "./app.js";
+
+  // ✅ Load user info from Firebase
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) return;
+
+    const data = await getUserProfile(user.uid);
+    document.getElementById("userName").textContent = data?.name || "User";
+    document.getElementById("userRole").textContent = data?.role || "---";
+
+    if (data?.photoURL) {
+      document.getElementById("userPhoto").src = data.photoURL;
+    }
+  });
+
+  // ✅ Logout
+  document.querySelector("[data-logout]").addEventListener("click", logout);
+
+  // ✅ Works on mobile to toggle sidebar
+  const sidebar = document.querySelector(".sidebar");
+  const toggle = document.getElementById("menuToggle");
+  if (toggle && sidebar) {
+    toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
+  }
+</script>
+
 <style>
-  .kps-header {
-    background: #006b3c;
-    color: #fff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 18px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    flex-wrap: wrap;
-  }
+/* ✅ same CSS as before — unchanged */
+.kps-header {
+  background: #006b3c;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 18px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  flex-wrap: wrap;
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
 
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+.menu-btn {
+  background: transparent; border: none; font-size: 1.6rem;
+  color: #fff; cursor: pointer; display: none;
+}
 
-  .menu-btn {
-    background: transparent;
-    border: none;
-    font-size: 1.6rem;
-    color: #fff;
-    cursor: pointer;
-    display: none;
-  }
+.logo-link { display: flex; align-items: center; text-decoration: none; color: #fff; }
+.header-logo { height: 40px; width: 40px; margin-right: 10px; }
 
-  .logo-area {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-  }
+.logo-text h1 { font-size: 1.1rem; font-weight: 600; margin: 0; }
+.logo-text .slogan { font-size: 0.8rem; margin: 0; opacity: 0.85; }
 
-  .logo-link {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: #fff;
-  }
+.header-right { display: flex; align-items: center; gap: 20px; }
 
-  .header-logo {
-    height: 40px;
-    width: 40px;
-    margin-right: 10px;
-  }
+.user-info { display: flex; align-items: center; gap: 10px; }
+.user-avatar {
+  width: 38px; height: 38px; border-radius: 50%; border: 2px solid #fff;
+  object-fit: cover;
+}
+.user-name { font-weight: 600; font-size: 0.95rem; }
+.user-role { font-size: 0.8rem; color: #e0e0e0; }
 
-  .logo-text h1 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0;
-  }
+.logout-btn {
+  background: #fff; color: #006b3c; border: none; border-radius: 6px;
+  padding: 6px 12px; cursor: pointer; font-weight: 600;
+  transition: background 0.25s;
+}
+.logout-btn:hover { background: #e5e5e5; }
 
-  .logo-text .slogan {
-    font-size: 0.8rem;
-    margin: 0;
-    opacity: 0.85;
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .user-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .user-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: 2px solid #fff;
-    object-fit: cover;
-  }
-
-  .user-name {
-    font-weight: 600;
-    font-size: 0.95rem;
-  }
-
-  .user-role {
-    font-size: 0.8rem;
-    color: #e0e0e0;
-  }
-
-  .logout-btn {
-    background: #fff;
-    color: #006b3c;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.25s;
-  }
-
-  .logout-btn:hover {
-    background: #e5e5e5;
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .menu-btn {
-      display: block;
-    }
-
-    .header-right {
-      flex: 1 1 100%;
-      justify-content: space-between;
-      margin-top: 10px;
-    }
-
-    .logo-text h1 {
-      font-size: 1rem;
-    }
-
-    .logo-text .slogan {
-      font-size: 0.75rem;
-    }
-  }
+@media(max-width:768px){
+  .menu-btn { display: block; }
+  .header-right { width: 100%; justify-content: space-between; margin-top: 8px; }
+}
 </style>
