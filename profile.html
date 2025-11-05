@@ -2,243 +2,201 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Profile | KPS Management System</title>
+  <title>My Profile | KPS Management System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
+
   <style>
     .profile-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      max-width: 700px;
-      margin: 0 auto;
+      background:#fff; padding:25px; border-radius:12px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.1);
+      max-width:700px;margin:auto;text-align:center;
     }
-
     .profile-photo {
-      width: 130px;
-      height: 130px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid #006b3c;
-      margin-bottom: 15px;
+      width:130px;height:130px;border-radius:50%;
+      object-fit:cover;border:3px solid #009e60;margin-bottom:12px;
     }
-
-    .profile-info {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
     .profile-info label {
-      font-weight: 600;
-      color: #006b3c;
+      font-weight:600;color:#006b3c;margin-top:6px;
     }
-
-    .profile-info input,
-    .profile-info select {
-      padding: 8px 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      width: 100%;
+    .profile-info input {
+      width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;
+      font-size:0.88rem;margin-top:3px;
     }
-
-    .profile-actions {
-      margin-top: 15px;
-      display: flex;
-      gap: 10px;
+    .btn {
+      background:#009e60;color:#fff;border:none;border-radius:8px;
+      padding:10px 18px;font-weight:600;cursor:pointer;margin-top:12px;
     }
-
-    .profile-actions button {
-      background: #006b3c;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 16px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background 0.3s;
+    .btn:hover{background:#00b874;}
+    .btn-reset{background:#888;}
+    .toast {
+      position:fixed;bottom:20px;right:20px;background:#009e60;color:white;
+      padding:12px 20px;border-radius:8px;font-weight:600;opacity:0;
+      transition:.4s;transform:translateY(20px);
     }
-
-    .profile-actions button:hover {
-      background: #009e58;
-    }
+    .toast.show{opacity:1;transform:translateY(0);}
   </style>
 </head>
+
 <body>
 
-  <!-- HEADER -->
-  <div id="header-container"></div>
+<div id="header-container"></div>
 
-  <!-- PAGE WRAPPER -->
-  <div class="app-shell">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="nav-title">Main Menu</div>
-      <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
-      <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
-      <a href="employee_list.html" class="nav-link">📋 Employee List</a>
-      <a href="attendance.html" class="nav-link">🕒 Attendance</a>
-      <a href="overtime.html" class="nav-link">⏱ Overtime</a>
-      <a href="requests.html" class="nav-link">📩 Requests</a>
-      <a href="reports.html" class="nav-link">📊 Reports</a>
-      <a href="meetings.html" class="nav-link">📅 Meetings</a>
-      <a href="notifications.html" class="nav-link">🔔 Notifications</a>
-      <a href="profile.html" class="nav-link active">👤 Profile</a>
-      <a href="settings.html" class="nav-link">⚙ Settings</a>
-    </aside>
+<div class="app-shell">
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-      <h2>Employee Profile</h2>
-      <p class="section-title">View and update your personal details</p>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="nav-title">Main Menu</div>
+    <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+    <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
+    <a href="employee_list.html" class="nav-link">📋 Employee List</a>
+    <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+    <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+    <a href="requests.html" class="nav-link">📩 Requests</a>
+    <a href="reports.html" class="nav-link">📊 Reports</a>
+    <a href="meetings.html" class="nav-link">📅 Meetings</a>
+    <a href="notifications.html" class="nav-link">🔔 Notifications</a>
+    <a href="profile.html" class="nav-link active">👤 Profile</a>
+    <a href="settings.html" class="nav-link">⚙ Settings</a>
+  </aside>
 
-      <div class="profile-container">
-        <img id="profilePhoto" src="assets/default-user.png" alt="Profile" class="profile-photo" />
+  <!-- MAIN -->
+  <main class="main-content">
+    <h2>My Profile</h2>
+    <p class="section-title">Update your contact & profile info</p>
 
-        <form id="profileForm" class="profile-info">
-          <label for="uid">Employee UID</label>
-          <input id="uid" type="text" disabled />
+    <div class="profile-container">
 
-          <label for="fullName">Full Name</label>
-          <input id="fullName" type="text" disabled />
+      <img id="profilePhoto" src="assets/default-user.png" class="profile-photo" />
 
-          <label for="role">Role</label>
-          <input id="role" type="text" disabled />
+      <form id="profileForm" class="profile-info">
 
-          <label for="section">Section</label>
-          <input id="section" type="text" disabled />
+        <label>Employee UID</label>
+        <input id="uid" disabled />
 
-          <label for="shift">Shift</label>
-          <input id="shift" type="text" disabled />
+        <label>Full Name</label>
+        <input id="fullName" disabled />
 
-          <label for="email">Email</label>
-          <input id="email" type="email" />
+        <label>Role</label>
+        <input id="role" disabled />
 
-          <label for="phone">Phone</label>
-          <input id="phone" type="text" />
+        <label>Section</label>
+        <input id="section" disabled />
 
-          <label for="photo">Change Profile Picture (Optional)</label>
-          <input id="photo" type="file" accept="image/*" />
+        <label>Shift</label>
+        <input id="shift" disabled />
 
-          <div class="profile-actions">
-            <button type="submit">💾 Save Changes</button>
-            <button type="button" id="resetBtn" style="background:#999;">🔄 Reset</button>
-          </div>
+        <label>Email</label>
+        <input id="email" type="email"/>
 
-          <p id="profileMsg" style="margin-top:10px; font-weight:600;"></p>
-        </form>
-      </div>
-    </main>
-  </div>
+        <label>Phone</label>
+        <input id="phone" type="text"/>
 
-  <!-- SCRIPT -->
-  <script type="module">
-    import { protectPage, attachLogout, loadUserData, db, storage } from "./app.js";
-    import {
-      doc,
-      getDoc,
-      updateDoc
-    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-    import {
-      ref,
-      uploadBytes,
-      getDownloadURL
-    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
+        <label>Profile Picture</label>
+        <input id="photo" type="file" accept="image/*"/>
 
-    // Load Header
-    fetch("header.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("header-container").innerHTML = html;
-        const sidebar = document.querySelector(".sidebar");
-        const toggle = document.getElementById("menuToggle");
-        if (toggle && sidebar) toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
-        attachLogout();
-        loadUserData();
-      });
+        <button class="btn" type="submit">💾 Save Changes</button>
+        <button class="btn btn-reset" type="button" id="resetBtn">↺ Reset</button>
 
-    protectPage();
+        <p id="msg" style="font-weight:600;margin-top:10px;"></p>
+      </form>
+    </div>
+  </main>
+</div>
 
-    const form = document.getElementById("profileForm");
-    const msg = document.getElementById("profileMsg");
-    const resetBtn = document.getElementById("resetBtn");
-    const photoInput = document.getElementById("photo");
-    const photoEl = document.getElementById("profilePhoto");
+<div id="toast" class="toast"></div>
 
-    async function loadProfile() {
-      const user = window.currentUser;
-      const docRef = doc(db, "employees", user.uid);
-      const snap = await getDoc(docRef);
+<script type="module">
+  import { protectPage, attachLogout, loadUserData, db, storage, auth } from "./app.js";
+  import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+  import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
-      if (!snap.exists()) {
-        msg.textContent = "⚠ Profile not found in database.";
-        msg.style.color = "red";
-        return;
-      }
+  // Header load
+  fetch("header.html").then(r=>r.text()).then(h=>{
+    document.getElementById("header-container").innerHTML=h;
+    attachLogout(); loadUserData();
+    const toggle=document.getElementById("menuToggle");
+    const sidebar=document.querySelector(".sidebar");
+    if(toggle&&sidebar) toggle.addEventListener("click",()=>sidebar.classList.toggle("active"));
+  });
 
-      const data = snap.data();
-      document.getElementById("uid").value = data.uid || user.uid;
-      document.getElementById("fullName").value = data.fullName || "";
-      document.getElementById("role").value = data.role || "";
-      document.getElementById("section").value = data.section || "";
-      document.getElementById("shift").value = data.shift || "";
-      document.getElementById("email").value = data.email || user.email || "";
-      document.getElementById("phone").value = data.phone || "";
-      photoEl.src = data.photoURL || "assets/default-user.png";
+  protectPage();
 
-      // Disable edit for employees
-      const editable = ["Admin", "Manager", "Supervisor"].includes(user.role);
-      document.querySelectorAll("#profileForm input").forEach(inp => {
-        if (!editable && !["email", "phone", "photo"].includes(inp.id)) inp.disabled = true;
-      });
+  const toast=document.getElementById("toast");
+  function showToast(msg, ok=true){
+    toast.textContent=msg;
+    toast.style.background = ok ? "#009e60" : "#e53935";
+    toast.classList.add("show");
+    setTimeout(()=>toast.classList.remove("show"),3000);
+  }
+
+  async function loadProfile(){
+    const u = window.currentUser;
+    if(!u) return;
+
+    const refEmp = doc(db, "employees", u.uid);
+    const snap = await getDoc(refEmp);
+
+    if(!snap.exists()){
+      showToast("Profile missing in database", false);
+      return;
     }
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      msg.textContent = "Updating profile...";
-      msg.style.color = "#555";
+    const d = snap.data();
+    uid.value = d.uid || u.uid;
+    fullName.value = d.fullName || "";
+    role.value = d.role || "";
+    section.value = d.section || "";
+    shift.value = d.shift || "";
+    email.value = d.email || u.email || "";
+    phone.value = d.phone || "";
+    profilePhoto.src = d.photoURL || "assets/default-user.png";
 
-      const user = window.currentUser;
-      const docRef = doc(db, "employees", user.uid);
-      const email = document.getElementById("email").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const photoFile = photoInput.files[0];
+    // Only Admin/Manager/Supervisor can edit full profile?
+    const editAllowed = ["Admin","Manager","Supervisor"].includes(u.role);
+    fullName.disabled = !editAllowed;
+    role.disabled = !editAllowed;
+  }
 
-      let photoURL = "";
+  document.getElementById("profileForm").addEventListener("submit", async e=>{
+    e.preventDefault();
+    msg.textContent="Updating...";
+    msg.style.color="#444";
 
-      try {
-        if (photoFile) {
-          const sref = ref(storage, `profiles/${user.uid}-${photoFile.name}`);
-          await uploadBytes(sref, photoFile);
-          photoURL = await getDownloadURL(sref);
-        }
+    const u = window.currentUser;
+    const refEmp = doc(db,"employees",u.uid);
 
-        const updates = { email, phone };
-        if (photoURL) updates.photoURL = photoURL;
+    const emailVal=email.value.trim();
+    const phoneVal=phone.value.trim();
+    const file = photo.files[0];
 
-        await updateDoc(docRef, updates);
-        msg.textContent = "✅ Profile updated successfully!";
-        msg.style.color = "green";
-        loadProfile();
-      } catch (err) {
-        console.error(err);
-        msg.textContent = "❌ " + err.message;
-        msg.style.color = "red";
+    const data={ email:emailVal, phone:phoneVal };
+
+    try{
+      if(file){
+        const pRef = ref(storage, `employee_photos/${u.uid}_${Date.now()}`);
+        await uploadBytes(pRef,file);
+        const url = await getDownloadURL(pRef);
+        data.photoURL = url;
       }
-    });
 
-    resetBtn.addEventListener("click", () => {
+      await updateDoc(refEmp,data);
+      showToast("✅ Saved successfully!");
       loadProfile();
-      msg.textContent = "";
-    });
 
+    }catch(err){
+      console.error(err);
+      showToast(err.message,false);
+    }
+  });
+
+  document.getElementById("resetBtn").addEventListener("click",()=>{
     loadProfile();
-  </script>
+    msg.textContent="";
+  });
+
+  loadProfile();
+</script>
+
 </body>
 </html>
