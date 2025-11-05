@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Deductions | KPS Management System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="style.css">
+
+<style>
+.deduct-card {
+  background:#fff;padding:20px;border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+  max-width:750px;margin:0 auto 30px;
+}
+.deduct-card h3{color:#006b3c;margin-bottom:10px;font-weight:700;}
+
+.deduct-form{
+  display:flex;flex-wrap:wrap;gap:10px;
+}
+.deduct-form select,.deduct-form input,.deduct-form textarea{
+  width:48%;padding:8px;border:1px solid #ccc;border-radius:6px;
+}
+textarea{width:100%;height:70px;}
+.deduct-form button{
+  background:#006b3c;color:#fff;border:none;border-radius:6px;
+  padding:10px 20px;margin-top:10px;cursor:pointer;font-weight:600;
+}
+.deduct-form button:hover{background:#009E58;}
+
+.deduct-table table{
+  width:100%;border-collapse:collapse;margin-top:15px;
+}
+.deduct-table th,.deduct-table td{
+  border:1px solid #ddd;padding:7px;font-size:.9rem;
+}
+.deduct-table th{background:#f5f5f5;font-weight:600}
+.status-approved{color:#039c4b;font-weight:700}
+.status-pending{color:#d98400;font-weight:700}
+</style>
+</head>
+
+<body>
+
+<!-- Header -->
+<div id="header-container"></div>
+
+<div class="app-shell">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="nav-title">Main Menu</div>
+  <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+  <a href="add_employee.html" class="nav-link">👤 Add Employee</a>
+  <a href="employee_list.html" class="nav-link">📋 Employee List</a>
+  <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+  <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+  <a href="deductions.html" class="nav-link active">💸 Deductions</a>
+  <a href="requests.html" class="nav-link">📩 Requests</a>
+  <a href="reports.html" class="nav-link">📊 Reports</a>
+  <a href="settings.html" class="nav-link">⚙ Settings</a>
+</aside>
+
+<!-- Main -->
+<main class="main-content">
+
+<h2>Deductions Management</h2>
+<p class="section-title">Late, Absence, Fine & Other Deductions</p>
+
+<!-- Add Deduction -->
+<div class="deduct-card">
+<h3>Add Deduction</h3>
+
+<form id="deductForm" class="deduct-form">
+  <select id="dedEmployee" required>
+    <option value="">Select Employee</option>
+  </select>
+
+  <input type="date" id="dedDate" required>
+
+  <select id="dedType" required>
+    <option value="">Select Type</option>
+    <option>Late</option>
+    <option>Absent</option>
+    <option>Fine</option>
+    <option>Uniform</option>
+    <option>Behaviour</option>
+    <option>Other</option>
+  </select>
+
+  <input type="number" id="dedAmount" placeholder="Amount (AED)" min="1" required>
+
+  <textarea id="dedNote" placeholder="Reason / Remarks"></textarea>
+
+  <button type="submit">➕ Add Deduction</button>
+</form>
+
+<p id="dedMsg" style="margin-top:10px;font-weight:600;"></p>
+</div>
+
+<!-- Deduction Records -->
+<div class="deduct-table">
+<h3>Deduction Records</h3>
+<table>
+<thead>
+<tr>
+  <th>Employee</th><th>Date</th><th>Type</th><th>Amount</th><th>Status</th><th>Action</th>
+</tr>
+</thead>
+<tbody id="dedTable">
+<tr><td colspan="6">Loading...</td></tr>
+</tbody>
+</table>
+</div>
+
+</main>
+</div>
+
+<script type="module">
+import { protectPage, attachUserInfo, logout, db } from "./app.js";
+import { 
+  collection, addDoc, getDocs, updateDoc, deleteDoc, doc, serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
+// Protect only Admin / Supervisor
+protectPage(["admin","manager","supervisor"]);
+
+// Load header
+fetch("header.html").then(r=>r.text()).then(h=>{
+  document.getElementById("header-container").innerHTML=h;
+  attachUserInfo();
+  document.addEventListener("click",e=>{
+    if(e.target.matches("[data-logout]")) logout();
+  });
+});
+
+const empSelect=document.getElementById("dedEmployee");
+const table=document.getElementById("dedTable");
+const form=document.getElementById("deductForm");
+const msg=document.getElementById("dedMsg");
+
+// Load Employees
+async function loadEmployees(){
+  const snap=await getDocs(collection(db,"employees"));
+  empSelect.innerHTML='<option value="">Select Employee</option>';
+  snap.forEach(d=>empSelect.innerHTML+=
+    `<option value="${d.id}">${d.data().fullName}</option>`
+  );
+}
+
+// Add Deduction
+form.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const emp=empSelect.value, date=dedDate.value, type=dedType.value,
+        amount=dedAmount.value, note=dedNote.value;
+
+  if(!emp||!date||!type||!amount){
+    msg.textContent="⚠ Please fill all fields"; msg.style.color="red"; return;
+  }
+
+  await addDoc(collection(db,"deductions"),{
+    empId:emp,date,type,amount:Number(amount),note,status:"pending",
+    timestamp:serverTimestamp()
+  });
+
+  msg.textContent="✅ Deduction added"; msg.style.color="green";
+  form.reset(); loadRecords();
+});
+
+// Load Records
+async function loadRecords(){
+  const snap=await getDocs(collection(db,"deductions"));
+  table.innerHTML="";
+
+  if(snap.empty){
+    table.innerHTML="<tr><td colspan='6'>No records</td></tr>"; return;
+  }
+
+  const emps=await getDocs(collection(db,"employees"));
+  let empMap={}; emps.forEach(e=>empMap[e.id]=e.data().fullName);
+
+  snap.forEach(d=>{
+    const x=d.data();
+    table.innerHTML+=`
+      <tr>
+        <td>${empMap[x.empId]||"Unknown"}</td>
+        <td>${x.date}</td>
+        <td>${x.type}</td>
+        <td>AED ${x.amount}</td>
+        <td class="status-${x.status}">${x.status}</td>
+        <td>
+          <button class="btn-small approve" data-id="${d.id}">Approve</button>
+          <button class="btn-small reject" data-id="${d.id}">Reject</button>
+          <button class="btn-small delete" data-id="${d.id}">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  document.querySelectorAll(".approve").forEach(btn=>btn.onclick=async()=>{ 
+    await updateDoc(doc(db,"deductions",btn.dataset.id),{status:"approved"});
+    loadRecords();
+  });
+
+  document.querySelectorAll(".reject").forEach(btn=>btn.onclick=async()=>{ 
+    await updateDoc(doc(db,"deductions",btn.dataset.id),{status:"rejected"});
+    loadRecords();
+  });
+
+  document.querySelectorAll(".delete").forEach(btn=>btn.onclick=async()=>{
+    if(confirm("Delete deduction?")){
+      await deleteDoc(doc(db,"deductions",btn.dataset.id));
+      loadRecords();
+    }
+  });
+}
+
+loadEmployees();
+loadRecords();
+</script>
+
+</body>
+</html>
