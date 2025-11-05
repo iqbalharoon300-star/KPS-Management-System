@@ -4,94 +4,68 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>KPS Login</title>
-
+  <link rel="stylesheet" href="style.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f6f7;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
+    body { display:flex; justify-content:center; align-items:center; height:100vh; background:#f2f5f4; }
     .login-box {
-      background: #fff;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      width: 90%;
-      max-width: 350px;
-      text-align: center;
+      width:360px; background:#fff; padding:30px; border-radius:10px;
+      box-shadow:0 4px 15px rgba(0,0,0,0.1); text-align:center;
     }
-    .login-box h2 {
-      color: #006b3c;
-      margin-bottom: 15px;
+    .login-box img { width:80px; margin-bottom:10px; }
+    h2 { color:#006b3c; margin-bottom:20px; }
+    input { width:100%; padding:10px; margin:8px 0; border:1px solid #ccc; border-radius:6px; }
+    button {
+      width:100%; padding:12px; background:#006b3c; color:#fff;
+      border:none; border-radius:6px; font-weight:700; cursor:pointer;
     }
-    .login-box input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    .login-box button {
-      width: 100%;
-      background: #006b3c;
-      color: #fff;
-      border: none;
-      padding: 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-    .login-box button:hover { background: #009a56; }
+    button:hover { background:#009e58; }
+    #msg{margin-top:10px;font-weight:600}
   </style>
 </head>
-
 <body>
-  <div class="login-box">
-    <h2>KPS Login</h2>
 
-    <form id="loginForm">
-      <input type="email" id="email" placeholder="Email" required>
-      <input type="password" id="password" placeholder="Password" required>
-      <button type="submit">Login</button>
-    </form>
+<div class="login-box">
+  <img src="assets/logo.png" alt="Kcal Logo">
+  <h2>KPS Login</h2>
 
-    <p id="loginMsg" style="font-weight:600;margin-top:10px;"></p>
-  </div>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button type="submit">Login</button>
+  </form>
 
-  <script type="module">
-    import { login } from "./app.js";
+  <p id="msg"></p>
+</div>
 
-    const form = document.getElementById("loginForm");
-    const msg = document.getElementById("loginMsg");
+<script type="module">
+import { auth, login } from "./app.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+document.getElementById("loginForm").addEventListener("submit", async(e)=>{
+  e.preventDefault();
+  const email = email.value.trim();
+  const password = password.value.trim();
+  const msg=document.getElementById("msg");
 
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
+  msg.textContent="Checking...";
+  msg.style.color="#444";
 
-      msg.textContent = "Checking...";
-      msg.style.color = "black";
+  try {
+    await login(email,password);
+    msg.textContent="✅ Login Success";
+    msg.style.color="green";
+    setTimeout(()=>location.href="dashboard.html",800);
+  } catch(err){
+    msg.textContent="❌ "+err.message;
+    msg.style.color="red";
+  }
+});
 
-      try {
-        await login(email, password);
-        msg.textContent = "✅ Login successful";
-        msg.style.color = "green";
+// if logged in → go dashboard
+onAuthStateChanged(auth,(user)=>{
+  if(user) location.href="dashboard.html";
+});
+</script>
 
-        setTimeout(() => {
-          window.location.href = "dashboard.html";
-        }, 700);
-
-      } catch (error) {
-        msg.textContent = "❌ " + error.message;
-        msg.style.color = "red";
-      }
-    });
-  </script>
 </body>
 </html>
