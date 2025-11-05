@@ -1,132 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Add Employee | KPS Management System</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <!-- HEADER -->
-  <div id="header-container"></div>
 
-  <!-- PAGE WRAPPER -->
-  <div class="app-shell">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="nav-title">Main Menu</div>
-      <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
-      <a href="add_employee.html" class="nav-link active">👤 Add Employee</a>
-      <a href="employee_list.html" class="nav-link">📋 Employee List</a>
-      <a href="attendance.html" class="nav-link">🕒 Attendance</a>
-      <a href="overtime.html" class="nav-link">⏱ Overtime</a>
-      <a href="requests.html" class="nav-link">📩 Requests</a>
-      <a href="reports.html" class="nav-link">📊 Reports</a>
-      <a href="meetings.html" class="nav-link">📅 Meetings</a>
-      <a href="notifications.html" class="nav-link">🔔 Notifications</a>
-      <a href="settings.html" class="nav-link">⚙ Settings</a>
-    </aside>
+<!-- HEADER -->
+<div id="header-container"></div>
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-      <h2>Add New Employee</h2>
-      <p class="section-title">Fill the details below to add a new team member</p>
+<!-- PAGE WRAPPER -->
+<div class="app-shell">
 
-      <form id="addEmployeeForm" class="kps-form">
-        <div class="kps-form-row">
-          <div>
-            <label for="uid">Employee UID</label>
-            <input type="text" id="uid" placeholder="e.g., 10489" required />
-          </div>
-          <div>
-            <label for="fullName">Full Name</label>
-            <input type="text" id="fullName" placeholder="Employee full name" required />
-          </div>
-          <div>
-            <label for="role">Role</label>
-            <select id="role" required>
-              <option value="">Select Role</option>
-              <option>Supervisor</option>
-              <option>Manager</option>
-              <option>Assistant Supervisor</option>
-              <option>Senior Packer</option>
-              <option>Junior Packer</option>
-              <option>Packer</option>
-            </select>
-          </div>
-          <div>
-            <label for="section">Section</label>
-            <select id="section" required>
-              <option value="">Select Section</option>
-              <option>All</option>
-              <option>Kcal Life</option>
-              <option>Kcal Lunch</option>
-              <option>Spring</option>
-              <option>Kcal Meal Plan</option>
-              <option>FuelUP</option>
-            </select>
-          </div>
-          <div>
-            <label for="shift">Shift</label>
-            <select id="shift" required>
-              <option value="">Select Shift</option>
-              <option>Day</option>
-              <option>Night</option>
-              <option>Both</option>
-            </select>
-          </div>
-          <div>
-            <label for="joiningDate">Joining Date</label>
-            <input type="date" id="joiningDate" required />
-          </div>
-          <div>
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Enter email" required />
-          </div>
-          <div>
-            <label for="phone">Phone Number</label>
-            <input type="text" id="phone" placeholder="Enter phone number" required />
-          </div>
-          <div>
-            <label for="photo">Profile Picture</label>
-            <input type="file" id="photo" accept="image/*" />
-          </div>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="nav-title">Main Menu</div>
+    <a href="dashboard.html" class="nav-link">🏠 Dashboard</a>
+    <a href="add_employee.html" class="nav-link active">👤 Add Employee</a>
+    <a href="employee_list.html" class="nav-link">📋 Employee List</a>
+    <a href="attendance.html" class="nav-link">🕒 Attendance</a>
+    <a href="overtime.html" class="nav-link">⏱ Overtime</a>
+    <a href="deductions.html" class="nav-link">💸 Deductions</a>
+    <a href="requests.html" class="nav-link">📩 Requests</a>
+    <a href="reports.html" class="nav-link">📊 Reports</a>
+    <a href="settings.html" class="nav-link">⚙ Settings</a>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <h2>Add New Employee</h2>
+    <p class="section-title">Fill details below</p>
+
+    <form id="addEmployeeForm" class="kps-form">
+
+      <div class="kps-form-row">
+        <div><label>UID</label><input id="uid" required></div>
+        <div><label>Full Name</label><input id="fullName" required></div>
+
+        <div>
+          <label>Role</label>
+          <select id="role" required>
+            <option value="">Select Role</option>
+            <option>Manager</option>
+            <option>Supervisor</option>
+            <option>Assistant Supervisor</option>
+            <option>Senior Packer</option>
+            <option>Junior Packer</option>
+            <option>Packer</option>
+          </select>
         </div>
 
-        <button type="submit" class="btn-action">➕ Add Employee</button>
-        <p id="statusMsg" style="margin-top:10px; font-weight:600;"></p>
-      </form>
-    </main>
-  </div>
+        <div>
+          <label>Section</label>
+          <select id="section" required>
+            <option value="">Select Section</option>
+            <option>Kcal Life</option>
+            <option>Kcal Lunch</option>
+            <option>Spring</option>
+            <option>Kcal Meal Plan</option>
+            <option>FuelUP</option>
+          </select>
+        </div>
 
-  <!-- LOAD HEADER, LOGOUT, AND PROTECTION -->
-  <script type="module">
-    import { protectPage, attachLogout, loadUserData } from "./app.js";
+        <div>
+          <label>Shift</label>
+          <select id="shift" required>
+            <option value="">Select Shift</option>
+            <option>Day</option>
+            <option>Night</option>
+            <option>Both</option>
+          </select>
+        </div>
 
-    // Load Header
-    fetch("header.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("header-container").innerHTML = html;
+        <div><label>Joining Date</label><input type="date" id="joiningDate" required></div>
+        <div><label>Email</label><input id="email" type="email" required></div>
+        <div><label>Phone</label><input id="phone" required></div>
+        <div><label>Photo</label><input id="photo" type="file" accept="image/*"></div>
+      </div>
 
-        const sidebar = document.querySelector(".sidebar");
-        const toggle = document.getElementById("menuToggle");
-        if (toggle && sidebar) {
-          toggle.addEventListener("click", () => sidebar.classList.toggle("active"));
-        }
+      <button type="submit" class="btn-action">➕ Add Employee</button>
+      <p id="statusMsg" style="font-weight:600;"></p>
 
-        attachLogout();
-        loadUserData();
-      });
+    </form>
+  </main>
+</div>
 
-    // Restrict Access to Supervisor/Manager/Admin
-    protectPage({ roles: ["Admin", "Manager", "Supervisor"] });
+<script type="module">
 
-    // Load Add Employee Logic
-    import("./app.js").then(m => {
-      if (m.setupAddEmployeePage) m.setupAddEmployeePage();
-    });
-  </script>
+import { protectPage, attachUserInfo, db } from "./app.js";
+import { collection, setDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-storage.js";
+
+protectPage(["admin","manager","supervisor"]);
+
+// Load header
+fetch("header.html")
+.then(r=>r.text())
+.then(h=>{ document.getElementById("header-container").innerHTML = h; attachUserInfo(); });
+
+const form = document.getElementById("addEmployeeForm");
+const msg = document.getElementById("statusMsg");
+const storage = getStorage();
+
+form.addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  msg.textContent = "Adding employee...";
+
+  const uid       = uidEl.value = document.getElementById("uid").value.trim();
+  const fullName  = document.getElementById("fullName").value.trim();
+  const role      = document.getElementById("role").value;
+  const section   = document.getElementById("section").value;
+  const shift     = document.getElementById("shift").value;
+  const joining   = document.getElementById("joiningDate").value;
+  const email     = document.getElementById("email").value;
+  const phone     = document.getElementById("phone").value;
+  const photoFile = document.getElementById("photo").files[0];
+
+  let photoURL = "";
+
+  // ✅ Upload photo if selected
+  if (photoFile) {
+    const imgRef = ref(storage, `employee_photos/${uid}.jpg`);
+    await uploadBytes(imgRef, photoFile);
+    photoURL = await getDownloadURL(imgRef);
+  }
+
+  // ✅ Save to Firestore
+  await setDoc(doc(db,"employees",uid),{
+    uid, fullName, role, section, shift, joiningDate: joining,
+    email, phone, photoURL,
+    createdAt: serverTimestamp()
+  });
+
+  msg.textContent = "✅ Employee Added!";
+  form.reset();
+
+});
+</script>
 
 </body>
 </html>
