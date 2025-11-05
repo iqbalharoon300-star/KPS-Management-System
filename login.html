@@ -13,6 +13,22 @@
     <button type="submit">Login</button>
   </form>
 
-  <script type="module" src="./app.js"></script>
+  <script type="module" src="./app.js">
+    import { login } from "./app.js";
+
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  try {
+    await login(email, password);
+    // Redirect handled by onAuthStateChanged in app.js
+  } catch (error) {
+    alert(error.message);
+  }
+});
+
+  </script>
 </body>
 </html>
