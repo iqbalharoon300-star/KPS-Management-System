@@ -1,9 +1,5 @@
 // KPS Management System – Firebase Configuration
-// --------------------------------------------------
-// Replace the placeholder values below with your real Firebase project keys
-// (from Firebase Console → Project Settings → Your Apps → Web App)
-
-export const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyBCkASzBYqvDpqLUh0nMjhdK1M-t0KTEms",
   authDomain: "kcal-system.firebaseapp.com",
   projectId: "kcal-system",
