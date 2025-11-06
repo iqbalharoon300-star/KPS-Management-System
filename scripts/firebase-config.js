@@ -4,11 +4,11 @@
 // (from Firebase Console → Project Settings → Your Apps → Web App)
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyB0fPDZpHEjxc7IMFd_f0_BrvTgqGJhySA",
-  authDomain: "kcal-packaging-workforce.firebaseapp.com",
-  projectId: "kcal-packaging-workforce",
-  storageBucket: "kcal-packaging-workforce.firebasestorage.app",
-  messagingSenderId: "1025039246589",
-  appId: "1:1025039246589:web:ce37f12ec000bc03e4ca94",
-  measurementId: "G-7EN3V2W0QW"
+  apiKey: "AIzaSyBCkASzBYqvDpqLUh0nMjhdK1M-t0KTEms",
+  authDomain: "kcal-system.firebaseapp.com",
+  projectId: "kcal-system",
+  storageBucket: "kcal-system.firebasestorage.app",
+  messagingSenderId: "884806367197",
+  appId: "1:884806367197:web:b7528f11f3ca00e4dee834",
+  measurementId: "G-V4Q901PLW9"
 };
